@@ -200,6 +200,17 @@ En tu archivo de configuración de servidores MCP (`mcp_config.json`):
 }
 ```
 
+---
+
+## 🔄 Integración Continua y Distribución (CI/CD)
+
+El repositorio incluye flujos de trabajo automatizados con GitHub Actions para asegurar máxima fiabilidad y portabilidad:
+
+* **CI - Build & Lint Verification (`ci.yml`)**: Valida en cada `push` y `pull request` la sintaxis Python, la integridad del AST y la compilación limpia del paquete en una matriz de entornos con Python 3.10, 3.11 y 3.12 sobre Ubuntu y Windows.
+* **Build & Release Package Distribution (`publish_package.yml`)**: Al publicar un nuevo Release en GitHub o mediante ejecución manual, compila automáticamente las distribuciones Wheel (`.whl`) y tarball (`.tar.gz`), valida los metadatos con `twine check` y adjunta los binarios precompilados a la GitHub Release oficial mediante `softprops/action-gh-release@v2`.
+
+---
+
 ## 🛡️ Filosofía Human-in-the-Loop, Propósito Ético y Respeto a la Plataforma
 
 > [!NOTE]
@@ -237,7 +248,7 @@ Este proyecto se apoya y rinde tributo a las siguientes iniciativas y creadores 
 
 ## 🗺️ Hoja de Ruta y TO-DO List (Roadmap)
 
-Estado actual del proyecto y próximas funcionalidades planificadas:
+Estado actual del proyecto y próximas funcionalidades planificadas (disponible también como tablero interactivo Kanban en [**GitHub Projects #2 - MCP LinkedIn Roadmap**](https://github.com/users/solari21/projects/2)):
 
 ### ✅ Implementado (v1.0.0)
 - [x] **Arquitectura FastMCP 2.2+**: 21 herramientas registradas con tipado estricto e introspección de esquemas.

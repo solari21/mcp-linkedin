@@ -44,7 +44,7 @@ Lista de tareas, funcionalidades activas y backlog evolutivo para el servidor **
   - [x] Estándar PEP 621 con `pyproject.toml` y entry points de consola (`mcp-linkedin`).
   - [x] Precompilación de paquetes Wheel (`.whl`) y tarball (`.tar.gz`) en `dist/`.
   - [x] Instaladores asistidos `install.bat` (Windows) e `install.sh` (Linux/macOS).
-  - [x] Workflows de GitHub Actions para CI (lint, sintaxis y build) y publicación en GitHub Packages.
+  - [x] Workflows de GitHub Actions para CI (lint, sintaxis y build) y distribución automática de binarios (.whl y .tar.gz) en GitHub Releases con action-gh-release.
 
 ---
 
