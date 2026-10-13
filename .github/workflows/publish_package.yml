@@ -1,4 +1,4 @@
-name: Publish Package to GitHub Packages & Releases
+name: Build & Release Package Distribution
 
 on:
   release:
@@ -6,11 +6,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-publish:
+  build-and-release:
+    name: Build & Attach Assets to Release
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      packages: write
 
     steps:
       - name: 📥 Checkout repository
@@ -30,10 +30,14 @@ jobs:
         run: |
           python -m build
 
-      - name: 🚀 Publish to GitHub Packages
-        env:
-          TWINE_USERNAME: ${{ github.actor }}
-          TWINE_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-          TWINE_REPOSITORY_URL: "https://upload.packages.github.com/${{ github.repository_owner }}/"
+      - name: ✅ Check package validity with Twine
         run: |
-          twine upload --skip-existing dist/*
+          twine check dist/*
+
+      - name: 🚀 Attach Precompiled Binaries to GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'release'
+        with:
+          files: dist/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
