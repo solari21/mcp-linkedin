@@ -146,14 +146,23 @@ cp .env.example .env
 
 ### Métodos de Autenticación Soportados
 
-1. **Autenticación Asistida (Recomendada - Cero contraseñas en texto plano)**:
-   Ejecuta el servidor y llama a `linkedin_renew_session_interactive`. Se abrirá una ventana de navegador para iniciar sesión manualmente o resolver el 2FA. Las cookies se guardarán cifradas en tu almacenamiento local.
-2. **Variables de Entorno (`.env`)**:
+1. **Arquitectura Paso Cero CDP (Predeterminado y Recomendado - Zero-Login & Cero Fricción)**:
+   * **Sincronización Pasiva en Caliente**: El servidor se conecta pasivamente al navegador del usuario (Brave Browser o Chrome en el puerto `9222`) vía Chrome DevTools Protocol (`Storage.getCookies`) mediante WebSocket directo.
+   * **Cero Contraseñas y Cero Captchas**: Extrae las cookies ya autenticadas (`li_at`, `JSESSIONID`) en menos de 50 ms sin requerir credenciales en texto plano ni provocar retos reCAPTCHA.
+   * **Inviolabilidad de la Sesión del Usuario (Anti-Revocación)**: Al evitar deliberadamente el login por formulario en subprocesos automatizados, se elimina por completo la política de revocación multi-sesión de LinkedIn, garantizando que el usuario **nunca sea expulsado de su sesión activa** en su navegador principal.
+   * **Cero Robo de Foco**: Operación 100% silenciosa en segundo plano sin desplegar ventanas que compitan con el trabajo del usuario.
+
+2. **Plan B Interactivo Desacoplado (`schtasks /IT`)**:
+   * Si no hay un navegador con CDP en ejecución y las cookies locales expiran, el servidor activa un fallback interactivo seguro mediante `schtasks /IT` (`SW_SHOWNOACTIVATE`) para resolver 2FA o retos en pantalla sin robar el foco del sistema.
+
+3. **Variables de Entorno (`.env`) (Entornos CI/CD / Servidores)**:
    ```env
    LINKEDIN_EMAIL="tu_correo@ejemplo.com"
    LINKEDIN_PASSWORD="tu_password_seguro"
    ```
-3. **Ruta personalizada de sesión**:
+
+4. **Almacenamiento Persistente de Sesión**:
+   * Las cookies se normalizan con esquema estricto Playwright y deduplicación anti-HTTP 999 en:
    ```env
    LINKEDIN_STORAGE_STATE_FILE="./config/linkedin_storage_state.json"
    ```

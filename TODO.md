@@ -8,6 +8,7 @@ Lista de tareas, funcionalidades activas y backlog evolutivo para el servidor **
 
 - [x] **Arquitectura y Core MCP**:
   - [x] Migración a SDK FastMCP (mcp>=1.2.0) con decoradores `@mcp.tool()`.
+  - [x] Arquitectura Paso Cero CDP: sincronización pasiva de cookies desde Brave CDP (puerto 9222) sin introducir credenciales ni provocar revocación multi-sesión.
   - [x] Gestión de ciclo de vida del navegador (Brave Browser primario con fallback a Chromium).
   - [x] Manejo inteligente de credenciales mediante `.env`, variables de entorno y archivos JSON locales.
   - [x] Soporte para modo Headless y Plan B interactivo asistido en Windows (`schtasks /IT`).
