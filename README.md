@@ -260,15 +260,23 @@ Este proyecto se apoya y rinde tributo a las siguientes iniciativas y creadores 
 Estado actual del proyecto y próximas funcionalidades planificadas (disponible también como tablero interactivo Kanban en [**GitHub Projects #2 - MCP LinkedIn Roadmap**](https://github.com/users/solari21/projects/2)):
 
 ### ✅ Implementado (v1.0.0)
+- [x] **Publicación Oficial de Lanzamiento**: Post publicado en vivo en LinkedIn con infografía técnica y primer comentario verificado ([Ver en LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7515912088733515776/)).
 - [x] **Arquitectura FastMCP 2.2+**: 21 herramientas registradas con tipado estricto e introspección de esquemas.
-- [x] **Publicación Enriquecida**: Soporte para subida de imágenes HD con `expect_file_chooser()` y primer comentario automático.
+- [x] **Publicación Enriquecida**: Soporte para subida de imágenes HD con `expect_file_chooser()` y primer comentario automático con motor Tiptap.
 - [x] **Control del Menú de 3 Puntos**: Fijar en destacados, guardar elementos, extraer snippet `<iframe>`, copiar enlace canónico, editar y eliminar publicaciones.
 - [x] **Salvaguardas Human-in-the-Loop**: Confirmación en dos fases (`confirm=True`) en acciones destructivas o irreversibles.
 - [x] **Plan B Interactivo sin Pérdida de Foco**: Detección de retos (2FA, reCAPTCHA) y proyección asistida con `schtasks /IT` en Windows.
-- [x] **Sanitización de Cookies Anti-HTTP 999**: Normalización de dominios y deduplicación estricta de `li_at`.
+- [x] **Sanitización de Cookies Anti-HTTP 999**: Normalización de dominios, desescape de comillas en `JSESSIONID` y deduplicación estricta de `li_at`.
 - [x] **Búsqueda e Inteligencia 360°**: Motores de búsqueda de personas, ofertas de empleo con descripción íntegra y fichas corporativas de empresas.
 - [x] **Bandeja de Entrada e Hilos**: Lectura de conversaciones recientes, consulta de hilos cronológicos y envío supervisado de mensajes.
 - [x] **Empaquetado y Distribución**: Paquetes precompilados Wheel (`.whl`) y Source Distribution (`.tar.gz`) listos para instalar.
+
+### 🛡️ Lecciones de Ingeniería y Selectores DOM en 2026
+1. **Inputs Fantasma en `/login`**: LinkedIn inyecta campos ocultos en el DOM para autocompletado y WebAuthn con dimensiones 0 (`visible: false`). Se requiere forzar el pseudoselector `:visible` (`input[type="email"]:visible`, `input[type="password"]:visible`) para evitar `TimeoutError` en Playwright.
+2. **Colisión de Botones SSO vs. Formulario**: El botón "Iniciar sesión con Microsoft" contiene el texto "Iniciar sesión". El envío debe realizarse mediante `Enter` en el input de contraseña (`press("Enter")`) o con coincidencia exacta de rol (`name="Iniciar sesión", exact=True`).
+3. **Diálogos Modales Post-Publicación**: Tras crear una publicación, LinkedIn levanta un elemento flotante `<dialog data-testid="dialog">` que intercepta eventos de ratón. Se requiere enviar `Escape` preventivo o despachar clics mediante JavaScript nativo (`evaluate('b => b.click()')`).
+4. **Editor Tiptap / ProseMirror**: La caja de comentarios no responde a `.fill()`; requiere interacción enfocada (`.click()`), tipeo con cadencia (`keyboard.type`) y saltos `Shift+Enter` para evitar envíos prematuros.
+
 
 ### 📋 Próximas Funcionalidades (Backlog)
 - [ ] **Encuestas Interactivas (Polls)**: Creación y monitorización de votos en encuestas de LinkedIn.

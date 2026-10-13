@@ -18,6 +18,8 @@ Lista de tareas, funcionalidades activas y backlog evolutivo para el servidor **
   - [x] Carga de imágenes en alta resolución mediante `expect_file_chooser()`.
   - [x] Publicación automática de primer comentario con enlaces para evitar penalización de alcance.
   - [x] Consulta de publicaciones recientes con métricas de impresiones y engagement (`linkedin_get_recent_posts`).
+  - [x] Publicación definitiva en vivo en LinkedIn con infografía HD y primer comentario verificado ([Ver en LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7515912088733515776/)).
+
 
 - [x] **Control Integral del Menú de 3 Puntos**:
   - [x] Fijar y desmarcar de destacados del perfil (`linkedin_toggle_feature_post`).
