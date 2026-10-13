@@ -24,6 +24,7 @@ if str(CURRENT_DIR) not in sys.path:
 
 from linkedin_interactive_login import (
     trigger_interactive_session_renewal,
+    sync_cookies_from_brave_cdp,
     sanitize_cookies,
     CREDS_FILE,
     STORAGE_STATE_FILE,
@@ -187,6 +188,9 @@ async def get_browser_and_context(playwright, headless: bool = True):
 
     }
 
+    # Paso 0: Sincronización silenciosa y atómica desde Brave CDP (puerto 9222) si está disponible
+    sync_cookies_from_brave_cdp()
+
     loaded_state = None
 
     if STORAGE_STATE_FILE.exists():
@@ -232,21 +236,13 @@ async def get_browser_and_context(playwright, headless: bool = True):
 async def ensure_authenticated(page, creds: dict):
 
     """
-
     Valida la vigencia de la sesión activa en el feed de LinkedIn.
-
-    Si la instancia ya está autenticada, retorna inmediatamente.
-
-    Si la sesión ha caducado o se detecta un desafío de seguridad (captcha/2FA),
-
-    activa automáticamente el Plan B interactivo en pantalla con Brave Browser (/IT).
-
+    Prioriza SIEMPRE la sesión activa en Brave Browser (CDP 9222) de forma silenciosa.
+    Solo recurre al login desatendido o al Plan B en caso de fallo absoluto.
     """
 
     # 1. Comprobación rápida de URL previa
-
     if ("feed" in page.url or "/in/" in page.url) and "login" not in page.url and "checkpoint" not in page.url and "uas" not in page.url:
-
         return page
 
     # 2. Navegar al feed con los cookies existentes para verificar sesión
@@ -257,11 +253,23 @@ async def ensure_authenticated(page, creds: dict):
         pass
 
     if ("feed" in page.url or "/in/" in page.url) and "login" not in page.url and "checkpoint" not in page.url and "uas" not in page.url:
-
         return page
 
-    # 3. Intentar login desatendido si hay credenciales disponibles
+    # 3. Sincronización en caliente desde Brave CDP si la navegación previa no entró al feed
+    if sync_cookies_from_brave_cdp():
+        try:
+            with open(STORAGE_STATE_FILE, "r", encoding="utf-8") as f:
+                raw_st = json.load(f)
+            if "cookies" in raw_st and raw_st["cookies"]:
+                await page.context.add_cookies(raw_st["cookies"])
+                await page.goto("https://www.linkedin.com/feed/", wait_until="commit", timeout=12000)
+                await page.wait_for_timeout(2500)
+                if ("feed" in page.url or "/in/" in page.url) and "login" not in page.url and "checkpoint" not in page.url and "uas" not in page.url:
+                    return page
+        except Exception:
+            pass
 
+    # 4. Intentar login desatendido solo si hay credenciales disponibles y no hay sesión en Brave
     needs_interactive = True
 
     if creds.get("email") and creds.get("password"):

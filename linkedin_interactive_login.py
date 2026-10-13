@@ -116,6 +116,49 @@ def sanitize_cookies(cookies: list) -> list:
         })
     return cleaned
 
+def sync_cookies_from_brave_cdp(port: int = 9222) -> bool:
+    """
+    Sincroniza silenciosamente las cookies de sesión activa de LinkedIn desde Brave CDP (puerto 9222)
+    mediante WebSocket atómico JSON-RPC directo (<100ms, cero ventanas, cero robo de foco, cero captcha).
+    """
+    try:
+        import urllib.request
+        with urllib.request.urlopen(f"http://127.0.0.1:{port}/json/version", timeout=1.5) as resp:
+            ver_data = json.loads(resp.read().decode())
+            ws_url = ver_data.get("webSocketDebuggerUrl")
+        if not ws_url:
+            return False
+
+        try:
+            import websocket
+            ws = websocket.create_connection(ws_url, timeout=2.5)
+            ws.send(json.dumps({"id": 1, "method": "Storage.getCookies"}))
+            msg = json.loads(ws.recv())
+            ws.close()
+            raw_cookies = msg.get("result", {}).get("cookies", [])
+        except Exception:
+            return False
+
+        linkedin_cookies = [c for c in raw_cookies if "linkedin" in c.get("domain", "")]
+        if not linkedin_cookies:
+            return False
+
+        has_li_at = any(c.get("name") == "li_at" for c in linkedin_cookies)
+        if not has_li_at:
+            return False
+
+        cleaned = sanitize_cookies(linkedin_cookies)
+        storage_data = {
+            "cookies": cleaned,
+            "origins": []
+        }
+        with open(STORAGE_STATE_FILE, "w", encoding="utf-8") as f:
+            json.dump(storage_data, f, indent=2)
+
+        return True
+    except Exception:
+        return False
+
 async def run_visible_login(result_file: str, timeout_sec: int = 180):
     """
     Ejecuta el navegador Brave en modo visible para que el usuario resuelva cualquier
@@ -246,7 +289,13 @@ def trigger_interactive_session_renewal(timeout_sec: int = 180) -> bool:
     """
     Despliega la ventana visible de Brave en la sesión interactiva del usuario (WinSta0\\Default)
     mediante el Programador de Tareas Interactivo de Windows (/IT).
+    Prioriza SIEMPRE la extracción silenciosa desde Brave CDP (puerto 9222) antes de abrir cualquier ventana.
     """
+    # 0. Contingencia Silenciosa Prioritaria: Si Brave CDP está activo, extraer cookies de inmediato (0 ventanas)
+    if sync_cookies_from_brave_cdp():
+        print("[Sesión LinkedIn] Sesión activa sincronizada silenciosamente desde Brave CDP (0 interacción).")
+        return True
+
     session_id = uuid.uuid4().hex[:8]
     task_name = f"Antigravity_LinkedIn_Renew_{session_id}"
     bat_path = TEMP_DIR / f"renew_{session_id}.bat"
