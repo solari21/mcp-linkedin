@@ -506,40 +506,61 @@ async def linkedin_create_post(text: str, image_path: str = None, first_comment:
 
             await page.wait_for_timeout(6000)
 
-            # Inyectar primer comentario si se especificó
-
+            # Inyectar primer comentario si se especificó con soporte para Tiptap / ProseMirror
             comment_status = "not_requested"
-
             if first_comment:
+                try:
+                    await page.wait_for_timeout(3000)
+                    # En el feed, el post recién publicado está en la parte superior
+                    comment_btn = page.locator('button[aria-label*="Comentar"], button:has-text("Comentar")').first
+                    if await comment_btn.count() > 0:
+                        try:
+                            await comment_btn.click()
+                            await page.wait_for_timeout(1500)
+                        except Exception:
+                            pass
 
-                act_url = await get_my_activity_url(page)
-                await page.goto(act_url, wait_until="domcontentloaded")
-
-                await page.wait_for_timeout(4000)
-
-                comment_btn = page.locator('button[aria-label*="Comentar"], button:has-text("Comentar")').first
-
-                if await comment_btn.count() > 0:
-
-                    await comment_btn.click()
-
-                    await page.wait_for_timeout(1500)
-
-                    comment_box = page.locator('div.editor-content, div[role="textbox"][contenteditable="true"]').first
+                    # Selector resiliente para editor Tiptap / ProseMirror
+                    comment_box = page.locator('div.tiptap.ProseMirror, div[role="textbox"][aria-label*="comentario"], div[role="textbox"][contenteditable="true"]').first
+                    if await comment_box.count() == 0:
+                        # Si no está en el feed, navegar a actividad reciente
+                        act_url = await get_my_activity_url(page)
+                        await page.goto(act_url, wait_until="commit")
+                        await page.wait_for_timeout(3500)
+                        comment_btn = page.locator('button[aria-label*="Comentar"], button:has-text("Comentar")').first
+                        if await comment_btn.count() > 0:
+                            await comment_btn.click()
+                            await page.wait_for_timeout(1500)
+                        comment_box = page.locator('div.tiptap.ProseMirror, div[role="textbox"][aria-label*="comentario"], div[role="textbox"][contenteditable="true"]').first
 
                     if await comment_box.count() > 0:
-
-                        await comment_box.fill(first_comment)
+                        await comment_box.click()
+                        await page.wait_for_timeout(400)
+                        lines = first_comment.split("\n")
+                        for idx, l in enumerate(lines):
+                            if l:
+                                await page.keyboard.type(l, delay=5)
+                            if idx < len(lines) - 1:
+                                await page.keyboard.press("Shift+Enter")
+                            await page.wait_for_timeout(30)
 
                         await page.wait_for_timeout(1500)
-
                         submit_btn = page.locator('button.comments-comment-box__submit-button, button:has-text("Comentar")').last
-
                         await submit_btn.click()
+                        await page.wait_for_timeout(4000)
 
-                        await page.wait_for_timeout(3000)
-
-                        comment_status = "posted"
+                        # Verificación en el DOM
+                        content = await page.content()
+                        snippet = lines[0][:25] if lines else "http"
+                        if snippet in content:
+                            comment_status = "posted_and_verified"
+                        else:
+                            comment_status = "posted"
+                    else:
+                        comment_status = "box_not_found"
+                except Exception as c_err:
+                    print(f"[MCP Linkedin] Error publicando primer comentario: {c_err}")
+                    comment_status = f"error: {c_err}"
 
             resolved_act_url = await get_my_activity_url(page)
             return {
