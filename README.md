@@ -152,20 +152,27 @@ cp .env.example .env
    * **Inviolabilidad de la Sesión del Usuario (Anti-Revocación)**: Al evitar deliberadamente el login por formulario en subprocesos automatizados, se elimina por completo la política de revocación multi-sesión de LinkedIn, garantizando que el usuario **nunca sea expulsado de su sesión activa** en su navegador principal.
    * **Cero Robo de Foco**: Operación 100% silenciosa en segundo plano sin desplegar ventanas que compitan con el trabajo del usuario.
 
-2. **Plan B Interactivo Desacoplado (`schtasks /IT`)**:
-   * Si no hay un navegador con CDP en ejecución y las cookies locales expiran, el servidor activa un fallback interactivo seguro mediante `schtasks /IT` (`SW_SHOWNOACTIVATE`) para resolver 2FA o retos en pantalla sin robar el foco del sistema.
+2. **Plan B Interactivo Supervisado (`linkedin_renew_session_interactive`)**:
+   * Invocable de forma explícita mediante la herramienta MCP cuando el usuario o un reto puntual (2FA/reCAPTCHA) lo requiera en Windows (`schtasks /IT` con `SW_SHOWNOACTIVATE`).
+   * **Erradicación de Bucles de Popups**: El servidor **NUNCA** abre ventanas físicas de forma desatendida o en bucle ante fallos de red o códigos HTTP 429/999. Si la sesión no es válida y no hay CDP activo, emite una excepción limpia `PermissionError` para que el usuario decida cuándo intervenir.
 
-3. **Variables de Entorno (`.env`) (Entornos CI/CD / Servidores)**:
+3. **Variables de Entorno (`.env`) (Entornos CI/CD / Servidores Headless)**:
    ```env
    LINKEDIN_EMAIL="tu_correo@ejemplo.com"
    LINKEDIN_PASSWORD="tu_password_seguro"
    ```
 
-4. **Almacenamiento Persistente de Sesión**:
-   * Las cookies se normalizan con esquema estricto Playwright y deduplicación anti-HTTP 999 en:
+4. **Almacenamiento Persistente y Blindaje de Sesión**:
+   * Las cookies se normalizan a `.linkedin.com` con esquema estricto Playwright, caducidad extendida a 1 año (`expires = now + 365 días`) y respaldo atómico inmune a sobreescrituras vacías (`.bak`) en:
    ```env
    LINKEDIN_STORAGE_STATE_FILE="./config/linkedin_storage_state.json"
    ```
+
+> [!WARNING]
+> ### 🛡️ Directrices Críticas de Resiliencia de Sesión (Lecciones de Producción)
+> 1. **Prohibición de Procesos Headless Concurrentes**: Si tu navegador habitual (Brave Browser) tiene la sesión de LinkedIn abierta, **NO** inicies instancias independientes de Chromium/Playwright (`browser.launch()`). LinkedIn detecta colisiones de huellas y canales TLS simultáneos sobre la misma cuenta, revocando inmediatamente el token `li_at` y forzando la ventana de tu navegador a la pantalla de «¡Hola de nuevo!» pidiendo contraseña. Utiliza siempre la conexión por WebSocket CDP directo hacia tu pestaña activa.
+> 2. **Prohibición de Formulario `/login` Automatizado**: Los scripts automatizados que introducen credenciales en el formulario web activan de inmediato los detectores de bot de LinkedIn y generan retos reCAPTCHA. La autenticación en este servidor se basa exclusivamente en tokens de sesión pasivos (`li_at`) capturados sin fricción.
+> 3. **Conexión Ligera WebSocket CDP (<10ms)**: Playwright `connect_over_cdp` puede congelarse durante 180s al intentar indexar extensiones y background workers. Este servidor se comunica mediante llamadas JSON-RPC directas sobre `webSocketDebuggerUrl` a la pestaña específica, con latencia mínima y cero cuelgues.
 
 ---
 

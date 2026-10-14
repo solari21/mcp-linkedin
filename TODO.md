@@ -18,7 +18,15 @@ Lista de tareas, funcionalidades activas y backlog evolutivo para el servidor **
   - [x] Carga de imágenes en alta resolución mediante `expect_file_chooser()`.
   - [x] Publicación automática de primer comentario con enlaces para evitar penalización de alcance.
   - [x] Consulta de publicaciones recientes con métricas de impresiones y engagement (`linkedin_get_recent_posts`).
-  - [x] Publicación definitiva en vivo en LinkedIn con infografía HD y primer comentario verificado ([Ver en LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7515912088733515776/)).
+  - [x] Publicación definitiva en vivo en LinkedIn con texto enriquecido íntegro, infografía técnica Blueprint v2 en alta resolución y primer comentario verificado ([Ver en LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7515951568215588864/)).
+
+- [x] **Gobernanza de Sesión, Resiliencia y Erradicación de Logins Recurrentes**:
+  - [x] **Erradicación Radical del Bucle de Popups**: Supresión definitiva de la llamada automática a `trigger_interactive_session_renewal` en `ensure_authenticated()`. Emisión de excepción limpia `PermissionError` en lugar de programar tareas en `schtasks /IT`.
+  - [x] **Prohibición de Subprocesos Playwright Concurrentes**: Regla estricta contra el lanzamiento de instancias independientes de Chromium si el navegador del usuario (Brave) mantiene una sesión activa de LinkedIn, evitando la revocación automática de `li_at` por colisión de huellas en la misma cuenta.
+  - [x] **Conexión Pasiva WebSocket CDP por Target**: Conexión directa y ligera (<10ms) a `ws://127.0.0.1:9222/devtools/page/<id>` para interactuar sobre la pestaña real de Brave, sorteando el cuelgue de 180s derivado de la enumeración de targets de `connect_over_cdp`.
+  - [x] **Prohibición Terminante de Formulario en `/login`**: Prohibido el tecleo automatizado de usuario y contraseña en la web de login para evitar el bloqueo preventivo por bot y retos reCAPTCHA.
+  - [x] **Persistencia Garantizada a 1 Año y Copia Atómica `.bak`**: Normalización obligatoria de dominios de cookies a `.linkedin.com` y extensión forzada de expiración a 365 días para `li_at`, `JSESSIONID` y cookies clave con respaldo atómico seguro.
+  - [x] **Integridad Estricta de Contenido Enriquecido**: Respeto escrupuloso de los textos solicitados por el usuario (ganchos, 5 suites arquitectónicas, propósito ético, 21 herramientas, atribuciones completas a Daniel Sticker en GitHub y Elias Biondo en LinkedIn) prohibiendo resúmenes unilaterales.
 
 
 - [x] **Control Integral del Menú de 3 Puntos**:

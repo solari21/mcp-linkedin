@@ -111,3 +111,11 @@
 - [x] Publicación del primer comentario verificado en DOM con enlace directo al repositorio GitHub (`https://github.com/solari21/mcp-linkedin`)
 - [x] Captura de URL canónica de la actividad: `https://www.linkedin.com/feed/update/urn:li:activity:7515951568215588864/`
 - [x] Sincronización de documentación (`README.md`, `walkthrough.md`, `task.md`) y push final a GitHub
+
+### Fase 18: Blindaje Documental, Lecciones de Producción y Sincronización Global
+- [x] Documentación exhaustiva en `TODO.md` de la erradicación del bucle de popups y salvaguardas de sesión
+- [x] Inclusión de alerta técnica en `README.md` sobre prohibición de subprocesos concurrentes y captura pasiva CDP
+- [x] Matriz forense completa de incidencias y causas raíz en `walkthrough.md` (Sección 11)
+- [x] Actualización de gobernanza global en `AGENTS.md` (Regla II.32 y Sección V.21) y `SKILL.md`
+- [x] Verificación de integridad con `agents_guardian.py` y `py_compile` (0 NameError, sintaxis limpia)
+- [x] Sincronización íntegra con GitHub (commit y push a `main`)
