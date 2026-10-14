@@ -345,35 +345,50 @@ async def open_post_menu(page, post_url: str = None, post_index: int = 0):
 # ==========================================
 
 @mcp.tool()
-
-async def linkedin_create_post(text: str, image_path: str = None, first_comment: str = None) -> dict:
-
+async def linkedin_create_post(
+    text: str,
+    image_path: str = None,
+    first_comment: str = None,
+    clean_previous_tests: bool = False
+) -> dict:
     """
-
-    Crea una publicación en LinkedIn con soporte opcional de imagen en alta resolución
-
-    y primer comentario automático (para enlaces salientes).
-
+    Crea una publicación en LinkedIn con soporte opcional de imagen en alta resolución,
+    primer comentario automático (para enlaces salientes) y limpieza pre-flight opcional
+    de publicaciones previas de prueba (clean_previous_tests=True).
     """
-
     creds = get_creds()
-
     async with async_playwright() as p:
-
         browser, context = await get_browser_and_context(p)
-
         page = await context.new_page()
-
         try:
-
             await ensure_authenticated(page, creds)
 
+            # Limpieza preventiva pre-flight de publicaciones de prueba previas si se solicita
+            if clean_previous_tests:
+                try:
+                    act_url = await get_my_activity_url(page)
+                    await page.goto(act_url, wait_until="commit")
+                    await page.wait_for_timeout(3000)
+                    menu_btn = page.locator('button[aria-label*="menú de controles"], button[aria-label*="controles"], button.feed-shared-control-menu__trigger').first
+                    if await menu_btn.count() > 0:
+                        await menu_btn.click()
+                        await page.wait_for_timeout(1000)
+                        del_item = page.locator('[role="menuitem"]:has-text("Eliminar publicación"), [role="menuitem"]:has-text("Delete post")').first
+                        if await del_item.count() > 0:
+                            await del_item.click()
+                            await page.wait_for_timeout(1500)
+                            confirm_btn = page.locator('button:has-text("Eliminar"), button:has-text("Delete")').first
+                            if await confirm_btn.count() > 0:
+                                await confirm_btn.click()
+                                await page.wait_for_timeout(3000)
+                except Exception as clean_err:
+                    print(f"[MCP Linkedin] Advertencia en limpieza preventiva: {clean_err}")
+                await page.goto("https://www.linkedin.com/feed/", wait_until="commit")
+                await page.wait_for_timeout(2500)
+
             # Abrir modal de publicación
-
             create_btn = page.locator('div[role="button"]:has-text("Crear publicación"), div[aria-label="Crear publicación"], button:has-text("Crear publicación")').first
-
             await create_btn.click()
-
             await page.wait_for_timeout(2000)
 
             # Adjuntar imagen si se solicita
@@ -463,7 +478,7 @@ async def linkedin_create_post(text: str, image_path: str = None, first_comment:
                             await page.wait_for_timeout(30)
 
                         await page.wait_for_timeout(1500)
-                        submit_btn = page.locator('button.comments-comment-box__submit-button, button:has-text("Comentar")').last
+                        submit_btn = page.locator('button.comments-comment-box__submit-button, button.hcbgmy, button:has-text("Comentar")').last
                         await submit_btn.click()
                         await page.wait_for_timeout(4000)
 
