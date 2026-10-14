@@ -82,32 +82,47 @@ def get_brave_path() -> str:
 BRAVE_PATH = get_brave_path()
 
 def sanitize_cookies(cookies: list) -> list:
-    """Asegura que los cookies cumplan con el esquema estricto de Playwright y evita HTTP 999."""
+    """Asegura que los cookies cumplan con el esquema estricto de Playwright, normaliza dominios a .linkedin.com y garantiza persistencia de 1 año."""
     cleaned = []
-    li_at_seen = False
+    seen_names = set()
+    now_ts = time.time()
+    one_year_ahead = now_ts + 365.0 * 24.0 * 3600.0
+
     for c in cookies:
+        name = c.get("name")
+        if not name or name in seen_names:
+            continue
+
+        dom = c.get("domain", "")
+        # Normalizar SIEMPRE el dominio de LinkedIn a .linkedin.com
+        if "linkedin.com" in dom:
+            dom = ".linkedin.com"
+
         exp = c.get("expires")
-        if exp is None or not isinstance(exp, (int, float)):
-            exp = -1.0
+        if exp is None or not isinstance(exp, (int, float)) or float(exp) <= 0 or float(exp) < now_ts:
+            # Asegurar persistencia de 1 año para cookies críticas de autenticación
+            if name in ["li_at", "li_rm", "JSESSIONID", "bcookie", "bscookie", "lidc"]:
+                exp = one_year_ahead
+            else:
+                exp = -1.0
         else:
             exp = float(exp)
-            
+
         ss = c.get("same_site") or c.get("sameSite") or "Lax"
         ss_norm = ss.capitalize() if isinstance(ss, str) else "Lax"
         if ss_norm not in ["Strict", "Lax", "None"]:
-            ss_norm = "Lax"
-            
-        # Deduplicar li_at para evitar HTTP 999 en LinkedIn
-        if c.get("name") == "li_at":
-            if li_at_seen:
-                continue
-            li_at_seen = True
-            c["domain"] = ".linkedin.com"
-            
+            ss_norm = "None" if c.get("secure") else "Lax"
+
+        val = str(c.get("value", ""))
+        # Desescapar comillas literales que a veces devuelve CDP
+        if val.startswith('"') and val.endswith('"') and len(val) > 1:
+            val = val[1:-1]
+
+        seen_names.add(name)
         cleaned.append({
-            "name": c["name"],
-            "value": c["value"],
-            "domain": c["domain"],
+            "name": name,
+            "value": val,
+            "domain": dom,
             "path": c.get("path", "/"),
             "expires": exp,
             "httpOnly": c.get("httpOnly", c.get("http_only", False)),
@@ -115,6 +130,41 @@ def sanitize_cookies(cookies: list) -> list:
             "sameSite": ss_norm
         })
     return cleaned
+
+def save_storage_state_atomically(cookies: list) -> bool:
+    """Guarda atómicamente el estado de almacenamiento con li_at verificado, normalizado y respaldo .bak permanente."""
+    has_li_at = any(c.get("name") == "li_at" and len(str(c.get("value", ""))) > 10 for c in cookies)
+    if not has_li_at:
+        return False
+
+    cleaned = sanitize_cookies(cookies)
+    storage_data = {
+        "cookies": cleaned,
+        "origins": [
+            {
+                "origin": "https://www.linkedin.com",
+                "localStorage": []
+            }
+        ]
+    }
+
+    # 1. Archivo canónico global
+    STORAGE_STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(STORAGE_STATE_FILE, "w", encoding="utf-8") as f:
+        json.dump(storage_data, f, indent=2)
+
+    # 2. Respaldo permanente .bak (nunca se sobrescribe con datos vacíos)
+    backup_file = STORAGE_STATE_FILE.with_suffix(".json.bak")
+    with open(backup_file, "w", encoding="utf-8") as f:
+        json.dump(storage_data, f, indent=2)
+
+    # 3. Directorio config local del proyecto
+    proj_config = Path(__file__).parent.resolve() / "config"
+    proj_config.mkdir(parents=True, exist_ok=True)
+    with open(proj_config / "linkedin_storage_state.json", "w", encoding="utf-8") as f:
+        json.dump(storage_data, f, indent=2)
+
+    return True
 
 def sync_cookies_from_brave_cdp(port: int = 9222) -> bool:
     """
@@ -143,21 +193,10 @@ def sync_cookies_from_brave_cdp(port: int = 9222) -> bool:
         if not linkedin_cookies:
             return False
 
-        has_li_at = any(c.get("name") == "li_at" for c in linkedin_cookies)
-        if not has_li_at:
-            return False
-
-        cleaned = sanitize_cookies(linkedin_cookies)
-        storage_data = {
-            "cookies": cleaned,
-            "origins": []
-        }
-        with open(STORAGE_STATE_FILE, "w", encoding="utf-8") as f:
-            json.dump(storage_data, f, indent=2)
-
-        return True
+        return save_storage_state_atomically(linkedin_cookies)
     except Exception:
         return False
+
 
 async def run_visible_login(result_file: str, timeout_sec: int = 180):
     """
@@ -208,46 +247,13 @@ async def run_visible_login(result_file: str, timeout_sec: int = 180):
             except Exception:
                 pass
 
-            # 2. Si hay credenciales, rellenar de forma asistida para el usuario
-            email_filled = False
-            if creds.get("email"):
-                try:
-                    email_el = page.locator('input[type="email"]:visible, input[autocomplete*="username"]:visible, input#username, #username').first
-                    await email_el.wait_for(state="visible", timeout=8000)
-                    await email_el.click()
-                    await email_el.fill(creds["email"])
-                    email_filled = True
-                    await page.wait_for_timeout(400)
-                except Exception as e_err:
-                    print(f"[Plan B] No se pudo autocompletar email: {e_err}")
-
-            pass_filled = False
-            if creds.get("password"):
-                try:
-                    pass_el = page.locator('input[type="password"]:visible, input[autocomplete*="password"]:visible, input#password, #password').first
-                    await pass_el.wait_for(state="visible", timeout=8000)
-                    await pass_el.click()
-                    await pass_el.fill(creds["password"])
-                    pass_filled = True
-                    await page.wait_for_timeout(400)
-                except Exception as p_err:
-                    print(f"[Plan B] No se pudo autocompletar contraseña: {p_err}")
-
-            # Solo enviar automáticamente si ambos campos se rellenaron con éxito
-            if email_filled and pass_filled:
-                try:
-                    pass_el = page.locator('input[type="password"]:visible, input[autocomplete*="password"]:visible, input#password, #password').first
-                    await pass_el.press("Enter")
-                except Exception:
-                    pass
-
-            # 3. Esperar a que el usuario complete el inicio de sesión / captcha en pantalla
-            print(f"[Plan B] Esperando que el usuario complete la sesión en pantalla (hasta {timeout_sec}s)...")
+            # 2. Esperar a que el usuario complete su inicio de sesión en pantalla de forma natural
+            print(f"[Plan B] Ventana abierta en https://www.linkedin.com/login. Esperando inicio de sesión del usuario (hasta {timeout_sec}s)...")
             start_t = time.time()
             success = False
             while time.time() - start_t < timeout_sec:
                 try:
-                    await page.wait_for_timeout(1500)
+                    await page.wait_for_timeout(1000)
                     curr_url = page.url
                     if ("feed" in curr_url or "/in/" in curr_url) and "login" not in curr_url and "checkpoint" not in curr_url and "uas" not in curr_url:
                         print(f"[Plan B] ¡Sesión alcanzada exitosamente en {curr_url}!")
@@ -258,15 +264,17 @@ async def run_visible_login(result_file: str, timeout_sec: int = 180):
                     break
 
             if success:
-                # 4. Guardar storage state depurado
+                # 3. Guardar storage state depurado de forma permanente
                 raw_state = await context.storage_state()
-                raw_state["cookies"] = sanitize_cookies(raw_state.get("cookies", []))
-                with open(STORAGE_STATE_FILE, "w", encoding="utf-8") as f:
-                    json.dump(raw_state, f, indent=2)
-
-                with open(result_file, "w", encoding="utf-8") as f:
-                    json.dump({"status": "success", "url": page.url}, f)
-                print("[Plan B] Estado de sesión y cookies guardadas con éxito.")
+                saved = save_storage_state_atomically(raw_state.get("cookies", []))
+                if saved:
+                    with open(result_file, "w", encoding="utf-8") as f:
+                        json.dump({"status": "success", "url": page.url}, f)
+                    print("[Plan B] Estado de sesión y cookies guardadas con éxito permanente.")
+                else:
+                    with open(result_file, "w", encoding="utf-8") as f:
+                        json.dump({"status": "no_li_at", "url": page.url}, f)
+                    print("[Plan B] Sesión alcanzada pero cookie li_at no encontrada.")
             else:
                 with open(result_file, "w", encoding="utf-8") as f:
                     json.dump({"status": "timeout", "url": page.url}, f)

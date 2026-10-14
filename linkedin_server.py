@@ -26,6 +26,7 @@ from linkedin_interactive_login import (
     trigger_interactive_session_renewal,
     sync_cookies_from_brave_cdp,
     sanitize_cookies,
+    save_storage_state_atomically,
     CREDS_FILE,
     STORAGE_STATE_FILE,
     AUTH_DIR,
@@ -269,74 +270,25 @@ async def ensure_authenticated(page, creds: dict):
         except Exception:
             pass
 
-    # 4. Intentar login desatendido solo si hay credenciales disponibles y no hay sesión en Brave
-    needs_interactive = True
-
-    if creds.get("email") and creds.get("password"):
-
+    # 4. Prohibición estricta de login automatizado por formulario (Regla Anti-Captcha).
+    # Si la sesión activa no es válida, intentar restaurar desde respaldo .bak antes de pedir intervención.
+    backup_file = STORAGE_STATE_FILE.with_suffix(".json.bak")
+    if backup_file.exists():
         try:
-
-            await page.goto("https://www.linkedin.com/login", wait_until="commit")
-
-            await page.wait_for_timeout(2000)
-
-            cookie_btn = page.get_by_role("button", name="Aceptar")
-
-            if await cookie_btn.count() > 0:
-
-                await cookie_btn.first.click()
-
-                await page.wait_for_timeout(1000)
-
-            email_filled = False
-            try:
-                email_box = page.locator('input[type="email"]:visible, input[autocomplete*="username"]:visible, input#username, #username').first
-                await email_box.wait_for(state="visible", timeout=6000)
-                await email_box.click()
-                await email_box.fill(creds["email"])
-                email_filled = True
-                await page.wait_for_timeout(300)
-            except Exception:
-                pass
-
-            pass_filled = False
-            try:
-                pass_box = page.locator('input[type="password"]:visible, input[autocomplete*="password"]:visible, input#password, #password').first
-                await pass_box.wait_for(state="visible", timeout=6000)
-                await pass_box.click()
-                await pass_box.fill(creds["password"])
-                pass_filled = True
-                await page.wait_for_timeout(300)
-            except Exception:
-                pass
-
-            if email_filled and pass_filled:
-                pass_box = page.locator('input[type="password"]:visible, input[autocomplete*="password"]:visible, input#password, #password').first
-                await pass_box.press("Enter")
-
-            await page.wait_for_timeout(4000)
-
-            current_url = page.url
-
-            if ("feed" in current_url or "/in/" in current_url) and "login" not in current_url and "checkpoint" not in current_url and "uas" not in current_url:
-
-                # Login desatendido exitoso sin desafíos
-
-                raw_state = await page.context.storage_state()
-
-                raw_state["cookies"] = sanitize_cookies(raw_state.get("cookies", []))
-
-                with open(STORAGE_STATE_FILE, "w", encoding="utf-8") as f:
-
-                    json.dump(raw_state, f, indent=2)
-
-                needs_interactive = False
-
-                return page
-
+            with open(backup_file, "r", encoding="utf-8") as f_bak:
+                bak_st = json.load(f_bak)
+            if "cookies" in bak_st and bak_st["cookies"]:
+                await page.context.clear_cookies()
+                await page.context.add_cookies(bak_st["cookies"])
+                await page.goto("https://www.linkedin.com/feed/", wait_until="commit", timeout=12000)
+                await page.wait_for_timeout(2500)
+                if ("feed" in page.url or "/in/" in page.url) and "login" not in page.url and "checkpoint" not in page.url and "uas" not in page.url:
+                    save_storage_state_atomically(bak_st["cookies"])
+                    return page
         except Exception:
+            pass
 
-            needs_interactive = True
+    needs_interactive = True
 
     # 4. PLAN B: Si no se alcanzó el feed (captcha, 2FA, checkpoint o credenciales caducadas),
 
