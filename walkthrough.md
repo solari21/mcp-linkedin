@@ -198,4 +198,18 @@ https://github.com/users/solari21/projects/2
 2. **Cero Fricción y Sesión Preservada**: La sesión de LinkedIn se mantiene 100% intacta en Brave Browser con vigencia garantizada a 1 año en `linkedin_storage_state.json` y respaldo en `.bak`.
 3. **Calidad de Código y AST**: Todos los servidores y módulos (`linkedin_server.py`, `linkedin_interactive_login.py`, `linkedin_extended.py`) validados con `py_compile` con 0 errores de sintaxis o runtime.
 
+---
+
+## 🔍 11. Registro Forense de Incidencias, Causas Raíz y Salvaguardas Preventivas
+
+| # | Incidencia Observada | Causa Raíz Forense | Impacto | Salvaguarda y Regla Definitiva |
+|---|----------------------|-------------------|---------|--------------------------------|
+| 1 | **Revocación de `li_at` en Brave («¡Hola de nuevo!»)** | Lanzamiento de subproceso Playwright headless (`browser.launch()`) con cookies compartidas mientras Brave tenía la sesión abierta. LinkedIn detectó colisión de huellas TLS/fingerprint concurrentes en la misma cuenta y revocó `li_at`. | Redirección forzosa de la pestaña del usuario a solicitud de contraseña. | **Prohibición de Subprocesos Concurrentes**: Si Brave está abierto con LinkedIn, PROHIBIDO lanzar Playwright independiente. Conexión pasiva mandatoria vía WebSocket CDP (`ws://127.0.0.1:9222/devtools/page/<id>`). |
+| 2 | **Bucle de Popups en Pantalla (`schtasks /IT`)** | Invocación automática de `trigger_interactive_session_renewal()` dentro de `ensure_authenticated()` ante cualquier retardo o código HTTP 429/999. | Ventanas físicas emergentes de login interrumpiendo al usuario repetidamente. | **Extirpación Total de Popups Desatendidos**: Eliminada la llamada automática. Ante falta de sesión, se emite una excepción limpia `PermissionError` sin abrir ventanas en el escritorio. |
+| 3 | **Cuelgue de 180s en `connect_over_cdp`** | `playwright.chromium.connect_over_cdp("http://127.0.0.1:9222")` enumera todos los targets del navegador (+80 extensiones, workers y pestañas), produciendo deadlock en el protocolo CDP. | Timeout de 3 minutos e interrupción del flujo. | **WebSocket Directo por Target (Regla II.32)**: Usar exclusivamente clientes WebSocket ligeros (`websocket-client`) dirigidos a `/devtools/page/<id>` con respuesta <10ms. |
+| 4 | **Checkpoint reCAPTCHA en `/login`** | Intentos de tecleo automatizado de credenciales (`fill` de usuario y contraseña + `Enter`) en el formulario de login. | Detección de bot heurística y bloqueo temporal de IP. | **Prohibición Absoluta de Formulario**: Cero introducción de credenciales por formulario. Autenticación 100% basada en cookies capturadas pasivamente con vigencia de 1 año. |
+| 5 | **Omisión de Cookies en Feed (`HTTP 429 / 302`)** | Cookies de sesión restringidas al subdominio `.www.linkedin.com` o con expiración efímera (`Session`). | Chromium descarta las cookies en peticiones al dominio raíz `linkedin.com/feed/`. | **Normalización a `.linkedin.com` y 1 Año**: Forzado de `domain: .linkedin.com` y `expires: now + 365 días` con respaldo atómico en `linkedin_storage_state.json.bak`. |
+| 6 | **Publicación Resumida No Autorizada** | Síntesis unilateral de los requerimientos de texto del post y comentario por parte del agente. | Pérdida de ganchos, suites arquitectónicas, declaraciones éticas y atribuciones. | **Integridad Estricta de Textos**: Obligación de publicar exactamente el contenido enriquecido aprobado por el usuario, sin abreviaciones ni omisiones. |
+
+
 
