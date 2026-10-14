@@ -260,7 +260,7 @@ Este proyecto se apoya y rinde tributo a las siguientes iniciativas y creadores 
 Estado actual del proyecto y próximas funcionalidades planificadas (disponible también como tablero interactivo Kanban en [**GitHub Projects #2 - MCP LinkedIn Roadmap**](https://github.com/users/solari21/projects/2)):
 
 ### ✅ Implementado (v1.0.0)
-- [x] **Publicación Oficial de Lanzamiento**: Post publicado en vivo en LinkedIn con infografía técnica y primer comentario verificado ([Ver en LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7515912088733515776/)).
+- [x] **Publicación Oficial de Lanzamiento**: Post publicado en vivo en LinkedIn con infografía técnica y primer comentario verificado ([Ver en LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7515951568215588864/)).
 - [x] **Arquitectura FastMCP 2.2+**: 21 herramientas registradas con tipado estricto e introspección de esquemas.
 - [x] **Publicación Enriquecida**: Soporte para subida de imágenes HD con `expect_file_chooser()` y primer comentario automático con motor Tiptap.
 - [x] **Control del Menú de 3 Puntos**: Fijar en destacados, guardar elementos, extraer snippet `<iframe>`, copiar enlace canónico, editar y eliminar publicaciones.
@@ -277,6 +277,8 @@ Estado actual del proyecto y próximas funcionalidades planificadas (disponible 
 3. **Diálogos Modales Post-Publicación**: Tras crear una publicación, LinkedIn levanta un elemento flotante `<dialog data-testid="dialog">` que intercepta eventos de ratón. Se requiere enviar `Escape` preventivo o despachar clics mediante JavaScript nativo (`evaluate('b => b.click()')`).
 4. **Editor Tiptap / ProseMirror**: La caja de comentarios no responde a `.fill()`; requiere interacción enfocada (`.click()`), tipeo con cadencia (`keyboard.type`) y saltos `Shift+Enter` para evitar envíos prematuros.
 5. **Normalización Estricta de Dominio de Cookies (`.linkedin.com`)**: Restringir el dominio de `li_at` a `.www.linkedin.com` provocaba que Chromium omitiera la cookie en peticiones al dominio raíz (`linkedin.com/feed/`) y APIs internas, desencadenando redirecciones HTTP 302 hacia `/login` y bloqueos de tasa HTTP 429. Se normalizan todos los dominios canónicamente a `.linkedin.com`.
+6. **Erradicación Radical del Bucle de Popups (Zero Invasive Windows)**: Se eliminó el lanzamiento automático de `trigger_interactive_session_renewal` en `ensure_authenticated()`. Si una sesión no está disponible, se emite una excepción limpia en lugar de invocar tareas en segundo plano que levanten ventanas físicas repetitivas.
+7. **Persistencia Garantizada a 1 Año y Captura Pasiva CDP**: Captura en caliente de la cookie `li_at` desde la sesión activa de Brave (puerto 9222) mediante WebSocket directo (`Storage.getCookies` / `Network.getCookies`), con extensión de caducidad forzada a 365 días y respaldo atómico inmune a sobreescrituras vacías (`linkedin_storage_state.json.bak`).
 
 
 

@@ -295,44 +295,10 @@ async def ensure_authenticated(page, creds: dict):
     # desplegar ventana interactiva física de Brave Browser en el escritorio del usuario (/IT).
 
     if needs_interactive:
-
-        print("[MCP Linkedin] Sesión caducada o desafío de seguridad (captcha/2FA). Activando Plan B interactivo...")
-
-        renewed = trigger_interactive_session_renewal(timeout_sec=180)
-
-        if not renewed:
-
-            raise PermissionError(
-
-                f"No se pudo completar la renovación interactiva de sesión en LinkedIn (tiempo agotado o cancelado). URL actual: {page.url}"
-
-            )
-
-        # 5. Aplicar las cookies recién actualizadas al contexto Playwright
-
-        if STORAGE_STATE_FILE.exists():
-
-            with open(STORAGE_STATE_FILE, "r", encoding="utf-8") as f:
-
-                saved_state = json.load(f)
-
-            new_cookies = saved_state.get("cookies", [])
-
-            if new_cookies:
-
-                await page.context.clear_cookies()
-
-                await page.context.add_cookies(new_cookies)
-
-        # 6. Re-verificar navegación al feed tras la renovación interactiva
-
-        await page.goto("https://www.linkedin.com/feed/", wait_until="domcontentloaded")
-
-        await page.wait_for_timeout(2500)
-
-        if not (("feed" in page.url or "/in/" in page.url) and "login" not in page.url and "checkpoint" not in page.url and "uas" not in page.url):
-
-            raise RuntimeError(f"Tras la renovación interactiva, la sesión sigue sin acceder al feed de LinkedIn: {page.url}")
+        raise PermissionError(
+            f"No hay sesión activa de LinkedIn en storage_state.json ni en Brave CDP (URL actual: {page.url}). "
+            "Por favor, inicia sesión en Brave para sincronizarla pasivamente sin ventanas emergentes."
+        )
 
     return page
 

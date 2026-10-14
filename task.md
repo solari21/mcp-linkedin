@@ -87,15 +87,27 @@
 - [x] Descarga de la infografía en alta resolución: [infografia_mcp_linkedin.png](file:///c:/Users/solari21.SOLARI21PC/Antigravity%20Projects/MCP%20Linkedin/assets/infografia_mcp_linkedin.png) (2752×1536 px, 5.03 MB)
 - [x] Commit y push oficial a la rama `main` en GitHub (`commit d293fb2`)
 
-### Fase 14: Diagnóstico Forense del Reto de Seguridad LinkedIn y Arquitectura de Sesión
+### Fase 14: Diagnóstico Forense del Reto de Seguridad LinkedIn y Checkpoints
 - [x] Descubrimiento de inputs fantasma en `/login`: LinkedIn inyecta campos invisibles (`visible: false`) para autocompletado y WebAuthn
 - [x] Análisis forense del checkpoint de seguridad: los intentos de login automatizados desde IP/huella nueva invalidaron temporalmente `li_at`, levantando el reCAPTCHA ("Vamos a hacer una comprobación rápida de seguridad")
-- [x] Activación no invasiva de la pestaña en Brave Browser (`A0AEE63EDBFB8A3905BF39940E679E4D`) para resolución del reto en pantalla
-- [x] Captura en caliente de la cookie canónica `li_at` vía CDP WebSocket tras validación, blindando `linkedin_storage_state.json` para eliminar por completo los accesos por formulario
+- [x] Detección de bucle de ventanas emergentes por invocación automática de `schtasks /IT` ante fallos de sesión
 
-### Fase 15: Publicación Oficial Definitiva del Post y Primer Comentario
-- [ ] Sincronización final de la cookie activa desde Brave CDP
-- [ ] Publicación del post oficial en LinkedIn adjuntando la nueva infografía Blueprint v2
-- [ ] Atribución oficial: perfil de LinkedIn de Elias Biondo y perfil de GitHub de Daniel Sticker (@stickerdaniel)
-- [ ] Inyección inmediata del primer comentario verificado en el DOM con enlaces al repositorio y documentación técnica
-- [ ] Captura visual del resultado y verificación end-to-end
+### Fase 15: Erradicación Radical del Bucle de Popups y Blindaje de Persistencia a 1 Año
+- [x] Supresión definitiva de la invocación automática de `trigger_interactive_session_renewal` en `ensure_authenticated` (cero ventanas no solicitadas)
+- [x] Normalización estricta del dominio de cookies a `.linkedin.com` (erradicando omisiones por subdominio `www`)
+- [x] Configuración de expiración persistente de 1 año (`now + 365 días`) para cookies críticas (`li_at`, `JSESSIONID`, `li_rm`)
+- [x] Creación de copia de seguridad atómica `linkedin_storage_state.json.bak` blindada contra sobreescrituras vacías
+- [x] Prohibición absoluta de tecleo automatizado de credenciales en `/login` para evitar reCAPTCHA y revocación de sesión
+- [x] Extracción comprehensiva dual en CDP: WebSocket directo a nivel navegador (`Storage.getCookies`) y nivel pestaña activa (`Network.getCookies`)
+
+### Fase 16: Captura Pasiva de Sesión en Brave y Verificación Headless
+- [x] Monitorización pasiva vía CDP de la sesión autenticada en Brave Browser (puerto 9222)
+- [x] Guardado atómico de `li_at` con vigencia de 1 año (`expires` en 2027) y sincronización a `.bak`
+- [x] Verificación de acceso al feed en modo 100% headless y anónimo con cookies normalizadas a `.linkedin.com`
+
+### Fase 17: Publicación Oficial Definitiva del Post y Primer Comentario
+- [x] Publicación del post oficial en LinkedIn con texto enriquecido completo y nueva infografía Blueprint v2 (`infografia_mcp_linkedin.png`)
+- [x] Atribución íntegra: Daniel Sticker (@stickerdaniel en GitHub) y Elias Biondo en LinkedIn
+- [x] Publicación del primer comentario verificado en DOM con enlace directo al repositorio GitHub (`https://github.com/solari21/mcp-linkedin`)
+- [x] Captura de URL canónica de la actividad: `https://www.linkedin.com/feed/update/urn:li:activity:7515951568215588864/`
+- [x] Sincronización de documentación (`README.md`, `walkthrough.md`, `task.md`) y push final a GitHub

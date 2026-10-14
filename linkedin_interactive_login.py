@@ -170,30 +170,61 @@ def sync_cookies_from_brave_cdp(port: int = 9222) -> bool:
     """
     Sincroniza silenciosamente las cookies de sesión activa de LinkedIn desde Brave CDP (puerto 9222)
     mediante WebSocket atómico JSON-RPC directo (<100ms, cero ventanas, cero robo de foco, cero captcha).
+    Combina Storage.getCookies a nivel navegador y Network.getCookies en pestañas activas de LinkedIn.
     """
     try:
         import urllib.request
-        with urllib.request.urlopen(f"http://127.0.0.1:{port}/json/version", timeout=1.5) as resp:
-            ver_data = json.loads(resp.read().decode())
-            ws_url = ver_data.get("webSocketDebuggerUrl")
-        if not ws_url:
-            return False
+        import websocket
 
+        collected_cookies = {}
+
+        # 1. Extracción a nivel de navegador (Storage.getCookies)
         try:
-            import websocket
-            ws = websocket.create_connection(ws_url, timeout=2.5)
-            ws.send(json.dumps({"id": 1, "method": "Storage.getCookies"}))
-            msg = json.loads(ws.recv())
-            ws.close()
-            raw_cookies = msg.get("result", {}).get("cookies", [])
+            with urllib.request.urlopen(f"http://127.0.0.1:{port}/json/version", timeout=1.5) as resp:
+                ver_data = json.loads(resp.read().decode())
+                ws_url = ver_data.get("webSocketDebuggerUrl")
+            if ws_url:
+                ws = websocket.create_connection(ws_url, timeout=2.5)
+                ws.send(json.dumps({"id": 1, "method": "Storage.getCookies"}))
+                msg = json.loads(ws.recv())
+                ws.close()
+                for c in msg.get("result", {}).get("cookies", []):
+                    if "linkedin" in c.get("domain", ""):
+                        collected_cookies[(c.get("name"), c.get("domain"))] = c
         except Exception:
+            pass
+
+        # 2. Extracción a nivel de pestaña activa (Network.getCookies con URLs canónicas)
+        try:
+            with urllib.request.urlopen(f"http://127.0.0.1:{port}/json", timeout=1.5) as resp:
+                tabs = json.loads(resp.read().decode())
+            li_tabs = [t for t in tabs if "linkedin.com" in t.get("url", "")]
+            for t in li_tabs:
+                tab_ws = t.get("webSocketDebuggerUrl")
+                if not tab_ws:
+                    continue
+                try:
+                    ws_tab = websocket.create_connection(tab_ws, timeout=2.0)
+                    ws_tab.send(json.dumps({
+                        "id": 1,
+                        "method": "Network.getCookies",
+                        "params": {"urls": ["https://www.linkedin.com/", "https://www.linkedin.com/feed/"]}
+                    }))
+                    msg_tab = json.loads(ws_tab.recv())
+                    ws_tab.close()
+                    for c in msg_tab.get("result", {}).get("cookies", []):
+                        if "linkedin" in c.get("domain", ""):
+                            collected_cookies[(c.get("name"), c.get("domain"))] = c
+                except Exception:
+                    pass
+        except Exception:
+            pass
+
+        cookies_list = list(collected_cookies.values())
+        if not cookies_list:
             return False
 
-        linkedin_cookies = [c for c in raw_cookies if "linkedin" in c.get("domain", "")]
-        if not linkedin_cookies:
-            return False
-
-        return save_storage_state_atomically(linkedin_cookies)
+        return save_storage_state_atomically(cookies_list)
     except Exception:
         return False
 
