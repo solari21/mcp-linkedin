@@ -27,6 +27,8 @@ Lista de tareas, funcionalidades activas y backlog evolutivo para el servidor **
   - [x] **Prohibición Terminante de Formulario en `/login`**: Prohibido el tecleo automatizado de usuario y contraseña en la web de login para evitar el bloqueo preventivo por bot y retos reCAPTCHA.
   - [x] **Persistencia Garantizada a 1 Año y Copia Atómica `.bak`**: Normalización obligatoria de dominios de cookies a `.linkedin.com` y extensión forzada de expiración a 365 días para `li_at`, `JSESSIONID` y cookies clave con respaldo atómico seguro.
   - [x] **Integridad Estricta de Contenido Enriquecido**: Respeto escrupuloso de los textos solicitados por el usuario (ganchos, 5 suites arquitectónicas, propósito ético, 21 herramientas, atribuciones completas a Daniel Sticker en GitHub y Elias Biondo en LinkedIn) prohibiendo resúmenes unilaterales.
+  - [x] **Deduplicación Preventiva y Limpieza Pre-Flight de Posts Huérfanos**: Protocolo obligatorio antes de publicar versiones definitivas para auditar posts recientes del perfil y eliminar publicaciones de prueba obsoletas con `linkedin_delete_post(confirm=True)`.
+  - [x] **Desambiguación de Selectores Tiptap en Comentarios**: Identificación precisa del botón primario de envío (`hcbgmy hcbhay`) y verificación estricta de renderizado en DOM para erradicar fallos silenciosos o comentarios en borrador.
 
 
 - [x] **Control Integral del Menú de 3 Puntos**:
