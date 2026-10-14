@@ -67,7 +67,7 @@ flowchart TD
 ## 🛠️ Catálogo Completo de Herramientas (21 Herramientas)
 
 ### A. Publicación y Distribución de Contenido
-* `linkedin_create_post`: Crea publicaciones profesionales con formato, hashtags, imagen opcional en alta definición y publicación automática del primer comentario con enlaces para no penalizar el alcance algorítmico.
+* `linkedin_create_post`: Crea publicaciones profesionales con formato, hashtags, imagen opcional en alta definición, publicación automática del primer comentario con enlaces y parámetro opcional `clean_previous_tests=True` para purga y deduplicación pre-flight de publicaciones previas de prueba.
 * `linkedin_get_recent_posts`: Extrae el listado de publicaciones recientes del perfil autenticado, con conteo de impresiones y engagement.
 * `linkedin_check_session`: Diagnostica la validez de la sesión activa, estado de cookies y conectividad con la plataforma.
 * `linkedin_renew_session_interactive`: Despliega una ventana asistida no invasiva para resolver desafíos de 2FA o reCAPTCHA y sincronizar la sesión.
