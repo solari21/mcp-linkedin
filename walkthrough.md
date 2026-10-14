@@ -124,28 +124,40 @@ Durante el ciclo de desarrollo y pruebas en vivo, se documentaron y resolvieron 
 
 ### Texto de la Publicación Oficial
 ```text
-🚀 Lanzamiento oficial de MCP LinkedIn v1.0.0: Servidor FastMCP de automatización profesional con Playwright y salvaguardas Human-in-the-Loop.
+🚀 ¡Lanzamos MCP LinkedIn: Servidor oficial de Model Context Protocol para LinkedIn!
 
-Permite a agentes de IA interactuar con LinkedIn de forma supervisada, ética y robusta:
-✅ Publicación enriquecida con imágenes HD y primer comentario automatizado.
-✅ Control del menú de 3 puntos (fijar en destacados, guardar, editar y eliminar con confirm=True).
-✅ Búsqueda y prospección 360° (personas, empleos y empresas).
-✅ Mensajería directa (inbox, lectura de hilos y envío supervisado).
-✅ Arquitectura Paso Cero CDP (puerto 9222) en Brave Browser para captura pasiva de cookies sin login conflictivo.
+Conecta asistentes de IA y agentes autónomos directamente con tu perfil y red profesional con FastMCP y Playwright sobre Brave Browser.
 
-Inspirado en el trabajo pionero de Daniel Sticker (https://github.com/stickerdaniel) y Elias Biondo (https://www.linkedin.com/in/eliasbiondo/).
+✨ 21 herramientas especializadas organizadas en 5 suites:
+1️⃣ Publicación enriquecida: Texto con emojis, hashtags, imágenes en alta resolución y primer comentario automático.
+2️⃣ Control integral (Menú de 3 puntos): Destacar en el perfil, guardar, editar, copiar enlaces limpios e incrustar iframes.
+3️⃣ Prospección inteligente: Búsqueda de profesionales, ofertas de empleo con filtros y centros de empresa.
+4️⃣ Mensajería supervisada: Consulta de bandeja de entrada (/messaging/), lectura de hilos y envío seguro en dos fases (confirm=True).
+5️⃣ Inteligencia de mercado: Extracción profunda de perfiles estructurados, feed y ofertas laborales.
 
-Enlace al repositorio y documentación técnica en el primer comentario. 👇
+🛡️ Arquitectura Paso Cero CDP:
+Sincronización en caliente pasiva vía Brave CDP (puerto 9222) que previene captchas y preserva la sesión activa sin solicitar credenciales.
 
-#AI #ModelContextProtocol #FastMCP #LinkedIn #Automation #Playwright #Python #OpenSource
+Agradecimientos especiales a Elias Biondo (https://www.linkedin.com/in/eliasbiondo/) y Daniel Sticker (@stickerdaniel en GitHub: https://github.com/stickerdaniel), cuyos proyectos open-source han servido como referencia para ampliar las capacidades del servidor.
+
+📦 Código abierto, paquete Wheel (.whl) y roadmap disponibles en GitHub.
+#ArtificialIntelligence #ModelContextProtocol #FastMCP #OpenSource #Automation #Python #Playwright #BraveBrowser #DeveloperTools
 ```
 
-### Primer Comentario Oficial (Verificado en DOM)
+### Primer Comentario Oficial (Verificado en DOM con Badge de Autor)
 ```text
-🔗 Repositorio oficial en GitHub, código abierto, documentación y paquetes:
+Dejo por aquí los accesos directos al proyecto:
+
+🔗 Repositorio en GitHub:
 https://github.com/solari21/mcp-linkedin
 
-Incluye la infografía técnica de arquitectura generada con Gemini NotebookLM, suite de 21 herramientas y guía paso a paso.
+📦 Releases Oficiales y Paquete Wheel (v1.0.0):
+https://github.com/solari21/mcp-linkedin/releases/tag/v1.0.0
+
+🎯 Tablero de Roadmap y Tareas en Progreso (GitHub Projects):
+https://github.com/users/solari21/projects/2
+
+¡Cualquier feedback, issue o PR para sumar nuevas herramientas es más que bienvenido! ⭐
 ```
 
 ---
@@ -156,3 +168,22 @@ Incluye la infografía técnica de arquitectura generada con Gemini NotebookLM, 
 - **Skill Global Estandarizada**: Documentada en `~/.gemini/config/skills/linkedin-automation/SKILL.md`.
 - **Normativa Canónica**: Registrada como Entrada #21 en Sección V del archivo canónico `AGENTS.md`.
 - **Roadmap Interactivo**: Gestionado activamente en el tablero [GitHub Projects V2 #2](https://github.com/users/solari21/projects/2).
+
+---
+
+## 🔍 8. Análisis Forense: Dominio de Cookies, Tasa 429 y Checkpoint reCAPTCHA
+
+### 1. El Bug de Dominio en `li_at` (`.www.linkedin.com` vs `.linkedin.com`)
+- **Causa Raíz**: En `linkedin_interactive_login.py` (línea 105), el código forzaba `c["domain"] = ".www.linkedin.com"`.
+- **Efecto Colateral**: El motor Chromium de Playwright solo adjuntaba la cookie en subdominios directos de `www`, pero la omitía en el dominio raíz (`linkedin.com/feed/`) y llamadas internas de API.
+- **Consecuencia**: LinkedIn interpretaba la petición como un usuario no autenticado, forzando una redirección HTTP 302 a `/login`. Al intentar el fallback de tecleo de credenciales en `/login`, LinkedIn activó sus defensas anti-bot.
+
+### 2. ¿Qué significa la "Tasa 429" (HTTP 429 Too Many Requests)?
+- **Mecanismo de LinkedIn**: Cuando se reciben múltiples peticiones automatizadas consecutivas en un intervalo muy corto a `linkedin.com/feed/` (o fallos de autenticación repetidos sin sesión válida), el cortafuegos de LinkedIn activa una limitación temporal de tasa (HTTP 429).
+- **Manifestación**: LinkedIn devuelve una página vacía (`<html><head></head><body></body></html>`) o redirige a un desafío de seguridad en lugar de cargar el feed.
+- **Resolución**: Dejar transcurrir el período de enfriamiento (cooldown) y acceder mediante cookies canónicas extraídas pasivamente por CDP o mediante la sesión viva en Brave Browser.
+
+### 3. Checkpoint de Seguridad reCAPTCHA ("Vamos a hacer una comprobación rápida de seguridad")
+- **Detección**: Google reCAPTCHA Enterprise detecta la presencia de banderas de automatización (`navigator.webdriver`, clicks por CDP sin aceleración humana) cuando se intenta automatizar el login por formulario.
+- **Protocolo Canónico**: Ante el checkpoint `linkedin.com/checkpoint/challenge/...`, la resolución humana mediante un clic único en la casilla `[ ] No soy un robot` en el navegador visible desbloquea la cuenta al instante, expidiendo una nueva cookie `li_at` auténtica que el servidor MCP captura de inmediato vía CDP.
+

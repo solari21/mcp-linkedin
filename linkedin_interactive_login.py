@@ -102,7 +102,7 @@ def sanitize_cookies(cookies: list) -> list:
             if li_at_seen:
                 continue
             li_at_seen = True
-            c["domain"] = ".www.linkedin.com"
+            c["domain"] = ".linkedin.com"
             
         cleaned.append({
             "name": c["name"],

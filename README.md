@@ -276,6 +276,8 @@ Estado actual del proyecto y próximas funcionalidades planificadas (disponible 
 2. **Colisión de Botones SSO vs. Formulario**: El botón "Iniciar sesión con Microsoft" contiene el texto "Iniciar sesión". El envío debe realizarse mediante `Enter` en el input de contraseña (`press("Enter")`) o con coincidencia exacta de rol (`name="Iniciar sesión", exact=True`).
 3. **Diálogos Modales Post-Publicación**: Tras crear una publicación, LinkedIn levanta un elemento flotante `<dialog data-testid="dialog">` que intercepta eventos de ratón. Se requiere enviar `Escape` preventivo o despachar clics mediante JavaScript nativo (`evaluate('b => b.click()')`).
 4. **Editor Tiptap / ProseMirror**: La caja de comentarios no responde a `.fill()`; requiere interacción enfocada (`.click()`), tipeo con cadencia (`keyboard.type`) y saltos `Shift+Enter` para evitar envíos prematuros.
+5. **Normalización Estricta de Dominio de Cookies (`.linkedin.com`)**: Restringir el dominio de `li_at` a `.www.linkedin.com` provocaba que Chromium omitiera la cookie en peticiones al dominio raíz (`linkedin.com/feed/`) y APIs internas, desencadenando redirecciones HTTP 302 hacia `/login` y bloqueos de tasa HTTP 429. Se normalizan todos los dominios canónicamente a `.linkedin.com`.
+
 
 
 ### 📋 Próximas Funcionalidades (Backlog)
