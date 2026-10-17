@@ -27,13 +27,13 @@ graph TB
 
     subgraph Layer3 ["🧠 Capa 3: Inteligencia Editorial & Datos (linkedin_intelligence.py)"]
         direction TB
-        subgraph Datasets ["💾 Datasets en Disco (data/)"]
+        subgraph Datasets ["💾 Datasets en Disco: data/"]
             D1[("hooks.json (21 Fórmulas)")]
             D2[("slop.json (113 Clichés)")]
             D3[("rubric.json (12 Criterios)")]
         end
         Engines["Motores Heurísticos:\n• Humanizador (3 Pasadas)\n• Detector Anti-IA (5 Checks)\n• Calibrador de Ganchos (140/210 car)\n• Planificador Carruseles 4:5\n• Triaje de Inbox & Respuestas"]
-        Datasets -.-> Engines
+        D3 -.-> Engines
     end
 
     subgraph Layer4 ["🌐 Capa 4: Automatización & Persistencia (browser.py)"]
