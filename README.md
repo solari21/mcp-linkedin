@@ -47,42 +47,66 @@ Actualmente existen implementaciones experimentales de MCP para LinkedIn en el e
 
 ---
 
-## 🏛️ Arquitectura del Sistema
+## 🏛️ Arquitectura del Sistema (Capas de Software)
+
+A diferencia de la secuencia temporal de publicación, la arquitectura de **MCP LinkedIn** es un modelo modular desacoplado en 5 capas que separa limpiamente las interfaces de cliente, la lógica de control, los motores heurísticos de inteligencia, la persistencia de cookies y la interacción en el navegador:
 
 ```mermaid
-flowchart TD
-    Client["🤖 Cliente MCP (Claude / Gemini / Cursor)"] -->|JSON-RPC via stdio| Server["⚡ FastMCP Server (linkedin_server.py)"]
-    
-    subgraph Intelligence ["🧠 Capa de Inteligencia Editorial & Anti-IA (linkedin_intelligence.py)"]
-        Server --> AntiAI["🧹 Humanizador (3 Pasadas) & Detector 5-Check"]
-        Server --> Copywriting["🎯 Calibrador de Ganchos (21 Fórmulas) & Comentarios (9 Arquetipos)"]
-        Server --> StrategyEngine["📑 Carruseles PDF 4:5, DMs en 4 Fases & Reciclaje"]
-        Server --> TriageEngine["📬 Triaje Inbox (5 Buckets) & Clasificador de Respuestas"]
+graph TB
+    subgraph Layer1 ["🖥️ CAPA 1: CLIENTES MCP (JSON-RPC stdio)"]
+        direction LR
+        C1["Claude Desktop"] ~~~ C2["Cursor IDE"] ~~~ C3["Antigravity / Gemini CLI"]
     end
 
-    subgraph Governance ["🛡️ Gobernanza Human-in-the-Loop (HITL)"]
-        Server --> Guard{"¿Acción Crítica?\n(Post, Comentario, DM, Borrado)"}
-        Guard -->|confirm=False| DraftMsg["🛑 Emisión de Borrador para Revisión Humana"]
-        Guard -->|confirm=True| ExecutionEngine["🚀 Motor de Ejecución en Vivo"]
-        ExecutionEngine --> RateLimiter["⏳ Throttling & Jitter Gaussiano (1.5s - 3.0s)"]
+    subgraph Layer2 ["⚡ CAPA 2: NÚCLEO FASTMCP (linkedin_server.py)"]
+        direction TB
+        ServerCore["Gateway FastMCP & Registro de 32 Herramientas"]
+        HITLGuard{"🛡️ Protocolo Human-in-the-Loop\n(confirm=True obligatorio)"}
+        Throttler["⏳ Rate Limiter & Jitter Gaussiano Humano (1.5s - 3.0s)"]
+        ServerCore --> HITLGuard
+        HITLGuard --> Throttler
     end
 
-    subgraph LiveBrowser ["🌐 Capa de Navegación en Vivo & Resiliencia"]
-        RateLimiter --> BraveCDP["🌐 Brave Browser CDP (Puerto 9222)"]
-        BraveCDP --> WS["WebSocket Ligero a Pestaña (/devtools/page/id)"]
-        WS --> LinkedInSPA["💼 LinkedIn SPA (0 Robo de Foco, Sin Revocación de li_at)"]
-        WS --> TiptapEditor["📝 Inyección Multilínea Tiptap (<p>) & Upload HD"]
-        BraveCDP --> FallbackSession{"¿Sesión Expirada / 2FA?"}
-        FallbackSession -->|Plan B| InteractiveFallback["🖥️ Plan B Interactivo Asistido (schtasks /IT)"]
-        InteractiveFallback -->|Resolución Manual| LinkedInSPA
+    subgraph Layer3 ["🧠 CAPA 3: INTELIGENCIA EDITORIAL & DATOS (linkedin_intelligence.py)"]
+        direction TB
+        subgraph Datasets ["💾 Datasets en Disco (data/)"]
+            D1[("hooks.json\n21 Fórmulas")]
+            D2[("slop.json\n113 Clichés")]
+            D3[("rubric.json\n12 Criterios")]
+        end
+        Engines["Motores Heurísticos:\n• Humanizador (3 Pasadas)\n• Detector Anti-IA (5 Checks)\n• Calibrador de Ganchos (140/210 car)\n• Planificador Carruseles 4:5\n• Triaje de Inbox & Respuestas"]
+        Datasets -.-> Engines
     end
+
+    subgraph Layer4 ["🌐 CAPA 4: AUTOMATIZACIÓN & PERSISTENCIA (browser.py)"]
+        direction TB
+        CDPManager["🌐 Conexión Pasiva Brave CDP (Puerto 9222)\nWebSocket Directo a Pestaña Activa"]
+        SessionStore[("💾 storage_state.json\nCookies Normalizadas a .linkedin.com\nPersistencia a 365 días")]
+        FallbackPlan["🖥️ Plan B Interactivo Asistido\n(schtasks /IT sin robo de foco)"]
+        CDPManager --- SessionStore
+        CDPManager -.-> FallbackPlan
+    end
+
+    subgraph Layer5 ["💼 CAPA 5: PLATAFORMA DESTINO"]
+        direction LR
+        L1["Feed & Tiptap Multilínea (párrafos)"] ~~~ L2["Bandeja /messaging/"] ~~~ L3["Perfiles & Búsqueda"]
+    end
+
+    Layer1 ==> Layer2
+    Layer2 <==> Layer3
+    Layer2 ==> Layer4
+    Layer4 ==> Layer5
 ```
 
 ---
 
 ## 🔄 Diagrama de Flujo Operativo (Ciclo de Vida End-to-End)
 
-El siguiente diagrama de flujo ilustra el ciclo de vida completo de una publicación o interacción profesional, orquestando las **32 herramientas** desde la ideación inicial hasta la monitorización post-publicación:
+El siguiente diagrama de flujo ilustra la secuencia temporal y el ciclo de vida completo de una publicación, orquestando las **32 herramientas** desde la ideación inicial hasta la monitorización post-publicación:
+
+<p align="center">
+  <img src="assets/diagrama_flujo_mcp_linkedin.png" alt="Diagrama de Flujo Operativo MCP LinkedIn" width="850">
+</p>
 
 ```mermaid
 flowchart TD

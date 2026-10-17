@@ -8,29 +8,53 @@ El ecosistema combina la **automatización de navegador en vivo más segura y si
 
 ## 🏗️ Arquitectura del Sistema
 
+A nivel de ingeniería, **MCP LinkedIn** se organiza en un modelo arquitectónico de 5 capas desacopladas que segregan las interfaces cliente, la orquestación FastMCP, los motores heurísticos de inteligencia con sus datasets en disco, el subsistema de automatización pasiva y la plataforma destino:
+
 ```mermaid
-flowchart TD
-    User["👨‍💻 Desarrollador / Agente Antigravity"] --> Server["⚡ Servidor FastMCP 'linkedin' (32 Herramientas)"]
-
-    subgraph Live["🌐 Capa 1: Navegador en Vivo (Brave CDP & Playwright)"]
-        Server --> CDP["Brave CDP Pasivo (Puerto 9222)"]
-        CDP --> TargetWS["WebSocket Ligero a Pestaña (/devtools/page/id)"]
-        TargetWS --> LinkedInWeb["💼 LinkedIn SPA (0 Robo de Foco, Sin Revocación de li_at)"]
-        Server --> SessionState["💾 Storage State Persistente (linkedin_storage_state.json)"]
+graph TB
+    subgraph Layer1 ["🖥️ CAPA 1: CLIENTES MCP (JSON-RPC stdio)"]
+        direction LR
+        C1["Claude Desktop"] ~~~ C2["Cursor IDE"] ~~~ C3["Antigravity / Gemini CLI"]
     end
 
-    subgraph Intelligence["🧠 Capa 2: Inteligencia Editorial y Heurística Anti-IA (linkedin_intelligence.py)"]
-        Server --> AntiAI["🧹 Humanizador (3 Pasadas) & 5-Check Detection Panel"]
-        Server --> Copywriting["🎯 Calibrador de Ganchos (21 Fórmulas) & Comentarios (9 Arquetipos)"]
-        Server --> Strategy["📊 Rúbrica de Perfil 100 Pts, Carruseles 4:5 y DMs en 4 Fases"]
-        Server --> Triage["📬 Triaje de Inbox (5 Buckets) y Respuestas en Hilos"]
+    subgraph Layer2 ["⚡ CAPA 2: NÚCLEO FASTMCP (linkedin_server.py)"]
+        direction TB
+        ServerCore["Gateway FastMCP & Registro de 32 Herramientas"]
+        HITLGuard{"🛡️ Protocolo Human-in-the-Loop\n(confirm=True obligatorio)"}
+        Throttler["⏳ Rate Limiter & Jitter Gaussiano Humano (1.5s - 3.0s)"]
+        ServerCore --> HITLGuard
+        HITLGuard --> Throttler
     end
 
-    subgraph Governance["🛡️ Capa 3: Salvaguardas Human-in-the-Loop (HITL)"]
-        Server --> Gate{"¿Acción Crítica?\n(Post, Comentario, DM, Borrado)"}
-        Gate -->|confirm=False| Draft["🛑 Presenta Borrador Estructurado al Usuario"]
-        Gate -->|confirm=True| Exec["🚀 Ejecución en Vivo con Validación en DOM"]
+    subgraph Layer3 ["🧠 CAPA 3: INTELIGENCIA EDITORIAL & DATOS (linkedin_intelligence.py)"]
+        direction TB
+        subgraph Datasets ["💾 Datasets en Disco (data/)"]
+            D1[("hooks.json\n21 Fórmulas")]
+            D2[("slop.json\n113 Clichés")]
+            D3[("rubric.json\n12 Criterios")]
+        end
+        Engines["Motores Heurísticos:\n• Humanizador (3 Pasadas)\n• Detector Anti-IA (5 Checks)\n• Calibrador de Ganchos (140/210 car)\n• Planificador Carruseles 4:5\n• Triaje de Inbox & Respuestas"]
+        Datasets -.-> Engines
     end
+
+    subgraph Layer4 ["🌐 CAPA 4: AUTOMATIZACIÓN & PERSISTENCIA (browser.py)"]
+        direction TB
+        CDPManager["🌐 Conexión Pasiva Brave CDP (Puerto 9222)\nWebSocket Directo a Pestaña Activa"]
+        SessionStore[("💾 storage_state.json\nCookies Normalizadas a .linkedin.com\nPersistencia a 365 días")]
+        FallbackPlan["🖥️ Plan B Interactivo Asistido\n(schtasks /IT sin robo de foco)"]
+        CDPManager --- SessionStore
+        CDPManager -.-> FallbackPlan
+    end
+
+    subgraph Layer5 ["💼 CAPA 5: PLATAFORMA DESTINO"]
+        direction LR
+        L1["Feed & Tiptap Multilínea (párrafos)"] ~~~ L2["Bandeja /messaging/"] ~~~ L3["Perfiles & Búsqueda"]
+    end
+
+    Layer1 ==> Layer2
+    Layer2 <==> Layer3
+    Layer2 ==> Layer4
+    Layer4 ==> Layer5
 ```
 
 ---
@@ -38,6 +62,10 @@ flowchart TD
 ## 🔄 Diagrama de Flujo Operativo End-to-End
 
 El siguiente diagrama de flujo describe la secuencia cronológica de operaciones desde la concepción del contenido hasta el triaje posterior a la publicación, garantizando el cumplimiento de las salvaguardas anti-IA y Human-in-the-Loop:
+
+<p align="center">
+  <img src="assets/diagrama_flujo_mcp_linkedin.png" alt="Diagrama de Flujo Operativo MCP LinkedIn" width="850">
+</p>
 
 ```mermaid
 flowchart TD
