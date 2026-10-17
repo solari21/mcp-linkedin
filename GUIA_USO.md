@@ -35,6 +35,60 @@ flowchart TD
 
 ---
 
+## 🔄 Diagrama de Flujo Operativo End-to-End
+
+El siguiente diagrama de flujo describe la secuencia cronológica de operaciones desde la concepción del contenido hasta el triaje posterior a la publicación, garantizando el cumplimiento de las salvaguardas anti-IA y Human-in-the-Loop:
+
+```mermaid
+flowchart TD
+    Start(["💡 Inicio: Idea, Activo Largo o Solicitud"]) --> Repurpose["🔄 linkedin_repurpose_content\nDesglose de ideas, cifras y mecanismos"]
+    
+    subgraph Step1 ["1. Redacción y Estrategia Editorial"]
+        Repurpose --> FormatChoice{"¿Formato de Publicación?"}
+        FormatChoice -->|"Post de Feed"| HookDraft["✍️ Redacción de Gancho (Líneas 1-2)"]
+        FormatChoice -->|"Carrusel PDF"| CarouselPlan["📑 linkedin_carousel_planner\nEstructura vertical 4:5 + HTML/CSS"]
+        FormatChoice -->|"Comentario de Valor"| CommentGen["💬 linkedin_generate_comment\n9 Arquetipos (El Recibo, Desacuerdo...)"]
+        
+        HookDraft --> HookEval["🎯 linkedin_hook_score\nValidación contra 21 Fórmulas\nMóvil (<=140 car) | Escritorio (<=210 car)"]
+    end
+
+    subgraph Step2 ["2. Blindaje Heurístico Anti-IA"]
+        HookEval --> Humanize["🧹 linkedin_humanize\nLimpieza 3 Pasadas: Invisibles, Em-dashes, Slop"]
+        CarouselPlan --> Humanize
+        CommentGen --> Humanize
+        
+        Humanize --> AIDetect["🔬 linkedin_detect_ai\nPanel 5 Verificaciones Heurísticas\n(Burstiness, Specificity, Slop, Fingerprint, Voice)"]
+        AIDetect --> ScoreCheck{"¿Score Humano >= 80?\n(Veredicto PASS)"}
+        ScoreCheck -->|"REVIEW / FLAGGED"| Refine["✏️ Refinar métrica débil (ej. Burstiness)"]
+        Refine --> Humanize
+    end
+
+    subgraph Step3 ["3. Gobernanza Human-in-the-Loop (HITL)"]
+        ScoreCheck -->|"PASS"| DraftPresentation["🛑 Presentar Borrador al Usuario\n(Texto, Imagen HD, Primer Comentario con Enlace)"]
+        DraftPresentation --> UserApproval{"¿Aprobación Explícita?\n('OK' / 'Adelante')"}
+        UserApproval -->|"No / Cambios"| EditDraft["✏️ Ajustes solicitados"]
+        EditDraft --> DraftPresentation
+        UserApproval -->|"confirm=True"| DispatchLive["🚀 Despacho de Ejecución en Vivo"]
+    end
+
+    subgraph Step4 ["4. Ejecución en Vivo y Conexión Pasiva CDP"]
+        DispatchLive --> BraveCDP["🌐 Brave Browser CDP (Puerto 9222)\nConexión WebSocket directa a pestaña activa\n(0 Robo de Foco, 0 Revocación de li_at)"]
+        BraveCDP --> TiptapExec["📝 Editor Tiptap / ProseMirror\nInyección multilínea Input.insertText (párrafos <p>)\nSubida HD expect_file_chooser()\nPrimer comentario con enlaces"]
+        TiptapExec --> VerifyDOM["✅ Verificación de Publicación en DOM"]
+    end
+
+    subgraph Step5 ["5. Monitorización, Triaje y Optimización"]
+        VerifyDOM --> Wait45["⏳ Espera 45-60 min (Recepción de Interacciones)"]
+        Wait45 --> TriageReplies["⚡ linkedin_triage_replies\nClasificación en 5 Niveles:\nLEAD, SUBSTANCE, PEER, SUPPORT, NOISE"]
+        TriageReplies --> PrioritizedResponse["🎯 Responder con prioridad máxima a LEAD y SUBSTANCE"]
+        
+        VerifyDOM -.-> RoutineInbox["📬 linkedin_triage_inbox\nFiltrado de Spam (Calendly) y Detección de Leads"]
+        VerifyDOM -.-> RoutineProfile["📊 linkedin_score_profile\nAuditoría Perfil 100 Pts + Plan Fix-First"]
+    end
+```
+
+---
+
 ## 🔐 Seguridad, Gobernanza y Principios Inviolables
 
 > [!IMPORTANT]

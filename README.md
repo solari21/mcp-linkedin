@@ -53,26 +53,82 @@ Actualmente existen implementaciones experimentales de MCP para LinkedIn en el e
 flowchart TD
     Client["🤖 Cliente MCP (Claude / Gemini / Cursor)"] -->|JSON-RPC via stdio| Server["⚡ FastMCP Server (linkedin_server.py)"]
     
-    subgraph Core ["Núcleo de MCP LinkedIn"]
-        Server --> Guard{"🛡️ Human-in-the-Loop\n(confirm=True)"}
-        Guard -->|Acciones Críticas| ExecutionEngine["🕹️ Motor de Ejecución"]
-        Guard -->|Sin Confirmación| RejectMsg["🛑 Rechazo Preventivo"]
-        ExecutionEngine --> RateLimiter["⏳ Throttling & Jitter Humano"]
-        RateLimiter --> BrowserManager["🌐 Browser Engine (Brave / Chromium)"]
+    subgraph Intelligence ["🧠 Capa de Inteligencia Editorial & Anti-IA (linkedin_intelligence.py)"]
+        Server --> AntiAI["🧹 Humanizador (3 Pasadas) & Detector 5-Check"]
+        Server --> Copywriting["🎯 Calibrador de Ganchos (21 Fórmulas) & Comentarios (9 Arquetipos)"]
+        Server --> StrategyEngine["📑 Carruseles PDF 4:5, DMs en 4 Fases & Reciclaje"]
+        Server --> TriageEngine["📬 Triaje Inbox (5 Buckets) & Clasificador de Respuestas"]
     end
 
-    subgraph Intelligence ["Inteligencia Editorial & Anti-IA"]
-        Server --> AntiAI["🧹 Humanizador & 5-Check Detector (Local)"]
-        Server --> ContentStrategy["🎯 21 Fórmulas de Ganchos & Carruseles"]
-        Server --> TriageEngine["📬 Triaje Inbox & Hilos (Leads/Spam)"]
+    subgraph Governance ["🛡️ Gobernanza Human-in-the-Loop (HITL)"]
+        Server --> Guard{"¿Acción Crítica?\n(Post, Comentario, DM, Borrado)"}
+        Guard -->|confirm=False| DraftMsg["🛑 Emisión de Borrador para Revisión Humana"]
+        Guard -->|confirm=True| ExecutionEngine["🚀 Motor de Ejecución en Vivo"]
+        ExecutionEngine --> RateLimiter["⏳ Throttling & Jitter Gaussiano (1.5s - 3.0s)"]
     end
+
+    subgraph LiveBrowser ["🌐 Capa de Navegación en Vivo & Resiliencia"]
+        RateLimiter --> BraveCDP["🌐 Brave Browser CDP (Puerto 9222)"]
+        BraveCDP --> WS["WebSocket Ligero a Pestaña (/devtools/page/id)"]
+        WS --> LinkedInSPA["💼 LinkedIn SPA (0 Robo de Foco, Sin Revocación de li_at)"]
+        WS --> TiptapEditor["📝 Inyección Multilínea Tiptap (<p>) & Upload HD"]
+        BraveCDP --> FallbackSession{"¿Sesión Expirada / 2FA?"}
+        FallbackSession -->|Plan B| InteractiveFallback["🖥️ Plan B Interactivo Asistido (schtasks /IT)"]
+        InteractiveFallback -->|Resolución Manual| LinkedInSPA
+    end
+```
+
+---
+
+## 🔄 Diagrama de Flujo Operativo (Ciclo de Vida End-to-End)
+
+El siguiente diagrama de flujo ilustra el ciclo de vida completo de una publicación o interacción profesional, orquestando las **32 herramientas** desde la ideación inicial hasta la monitorización post-publicación:
+
+```mermaid
+flowchart TD
+    Start(["💡 Inicio: Idea, Activo Largo o Solicitud"]) --> Repurpose["🔄 linkedin_repurpose_content\nDesglose de ideas, cifras y mecanismos"]
     
-    subgraph Resilience ["Resiliencia y Sesión"]
-        BrowserManager --> CookieSanitizer["🧹 Sanitizador Anti-HTTP 999"]
-        CookieSanitizer --> SessionCheck{"¿Sesión Válida?"}
-        SessionCheck -->|Sí| LinkedInWeb["💼 LinkedIn Web App"]
-        SessionCheck -->|Reto / 2FA / Expirada| Fallback["🖥️ Plan B Interactivo (/IT)"]
-        Fallback -->|Resolución de Usuario| LinkedInWeb
+    subgraph Step1 ["1. Redacción y Estrategia Editorial"]
+        Repurpose --> FormatChoice{"¿Formato de Publicación?"}
+        FormatChoice -->|"Post de Feed"| HookDraft["✍️ Redacción de Gancho (Líneas 1-2)"]
+        FormatChoice -->|"Carrusel PDF"| CarouselPlan["📑 linkedin_carousel_planner\nEstructura vertical 4:5 + HTML/CSS"]
+        FormatChoice -->|"Comentario de Valor"| CommentGen["💬 linkedin_generate_comment\n9 Arquetipos (El Recibo, Desacuerdo...)"]
+        
+        HookDraft --> HookEval["🎯 linkedin_hook_score\nValidación contra 21 Fórmulas\nMóvil (<=140 car) | Escritorio (<=210 car)"]
+    end
+
+    subgraph Step2 ["2. Blindaje Heurístico Anti-IA"]
+        HookEval --> Humanize["🧹 linkedin_humanize\nLimpieza 3 Pasadas: Invisibles, Em-dashes, Slop"]
+        CarouselPlan --> Humanize
+        CommentGen --> Humanize
+        
+        Humanize --> AIDetect["🔬 linkedin_detect_ai\nPanel 5 Verificaciones Heurísticas\n(Burstiness, Specificity, Slop, Fingerprint, Voice)"]
+        AIDetect --> ScoreCheck{"¿Score Humano >= 80?\n(Veredicto PASS)"}
+        ScoreCheck -->|"REVIEW / FLAGGED"| Refine["✏️ Refinar métrica débil (ej. Burstiness)"]
+        Refine --> Humanize
+    end
+
+    subgraph Step3 ["3. Gobernanza Human-in-the-Loop (HITL)"]
+        ScoreCheck -->|"PASS"| DraftPresentation["🛑 Presentar Borrador al Usuario\n(Texto, Imagen HD, Primer Comentario con Enlace)"]
+        DraftPresentation --> UserApproval{"¿Aprobación Explícita?\n('OK' / 'Adelante')"}
+        UserApproval -->|"No / Cambios"| EditDraft["✏️ Ajustes solicitados"]
+        EditDraft --> DraftPresentation
+        UserApproval -->|"confirm=True"| DispatchLive["🚀 Despacho de Ejecución en Vivo"]
+    end
+
+    subgraph Step4 ["4. Ejecución en Vivo y Conexión Pasiva CDP"]
+        DispatchLive --> BraveCDP["🌐 Brave Browser CDP (Puerto 9222)\nConexión WebSocket directa a pestaña activa\n(0 Robo de Foco, 0 Revocación de li_at)"]
+        BraveCDP --> TiptapExec["📝 Editor Tiptap / ProseMirror\nInyección multilínea Input.insertText (párrafos <p>)\nSubida HD expect_file_chooser()\nPrimer comentario con enlaces"]
+        TiptapExec --> VerifyDOM["✅ Verificación de Publicación en DOM"]
+    end
+
+    subgraph Step5 ["5. Monitorización, Triaje y Optimización"]
+        VerifyDOM --> Wait45["⏳ Espera 45-60 min (Recepción de Interacciones)"]
+        Wait45 --> TriageReplies["⚡ linkedin_triage_replies\nClasificación en 5 Niveles:\nLEAD, SUBSTANCE, PEER, SUPPORT, NOISE"]
+        TriageReplies --> PrioritizedResponse["🎯 Responder con prioridad máxima a LEAD y SUBSTANCE"]
+        
+        VerifyDOM -.-> RoutineInbox["📬 linkedin_triage_inbox\nFiltrado de Spam (Calendly) y Detección de Leads"]
+        VerifyDOM -.-> RoutineProfile["📊 linkedin_score_profile\nAuditoría Perfil 100 Pts + Plan Fix-First"]
     end
 ```
 
