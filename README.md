@@ -15,6 +15,9 @@
 
 A diferencia de otros scripts de automatización opacos, **MCP LinkedIn** incorpora una filosofía estricta de **Human-in-the-Loop (HITL)** con salvaguardas obligatorias en dos fases (`confirm=True`) para acciones críticas, emulación de cadencia humana y un Plan B interactivo que permite resolver retos de seguridad sin pérdida de foco.
 
+> [!TIP]
+> **Manual Operativo Completo**: Para consultar la guía detallada de comandos, prompts recomendados, arquitectura y flujos de trabajo semanales para las 32 herramientas, consulta la **[Guía Operativa de Uso (GUIA_USO.md)](./GUIA_USO.md)**.
+
 ---
 
 <p align="center">
