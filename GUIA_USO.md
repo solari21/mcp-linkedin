@@ -1,4 +1,4 @@
-# Guía Operativa de Uso: Servidor FastMCP LinkedIn (v1.1.0) para Jesús Moronta
+# Guía Operativa de Uso: Servidor FastMCP LinkedIn (v1.1.0) de Jesús Moronta
 
 Esta guía establece el manual operativo, la arquitectura de ingeniería y los casos de uso prácticos para las **32 herramientas** integradas en el servidor FastMCP [`linkedin_server.py`](file:///c:/Users/solari21.SOLARI21PC/Antigravity%20Projects/MCP%20Linkedin/linkedin_server.py). 
 
