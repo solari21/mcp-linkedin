@@ -301,7 +301,14 @@ Estado actual del proyecto y próximas funcionalidades planificadas (disponible 
 - [x] **Sanitización de Cookies Anti-HTTP 999**: Normalización de dominios, desescape de comillas en `JSESSIONID` y deduplicación estricta de `li_at`.
 - [x] **Búsqueda e Inteligencia 360°**: Motores de búsqueda de personas, ofertas de empleo con descripción íntegra y fichas corporativas de empresas.
 - [x] **Bandeja de Entrada e Hilos**: Lectura de conversaciones recientes, consulta de hilos cronológicos y envío supervisado de mensajes.
-- [x] **Empaquetado y Distribución**: Paquetes precompilados Wheel (`.whl`) y Source Distribution (`.tar.gz`) listos para instalar.
+### ✅ Implementado (v1.1.0 - Inteligencia Editorial y Heurística Anti-IA)
+- [x] **Motor Anti-IA y Limpieza Heurística**: Integración de `linkedin_humanize` (limpieza en 3 pasadas: 17 caracteres invisibles, tipografía y 113+ términos slop bilingües) y `linkedin_detect_ai` (panel de 5 verificaciones con veredicto PASS/REVIEW/FLAGGED).
+- [x] **Copywriting y Calibración de Ganchos**: `linkedin_hook_score` con 21 fórmulas probadas de alto impacto y validación de límites de corte visual móvil (140 car) y escritorio (210 car).
+- [x] **Auditoría de Perfil 100 Puntos**: `linkedin_score_profile` con 12 criterios objetivos y plan de acción prioritario *Fix-First*.
+- [x] **Generador de Comentarios de Alto Valor**: `linkedin_generate_comment` con 9 arquetipos profesionales erradicando comentarios vacíos.
+- [x] **Triaje de Inbox y Respuestas**: `linkedin_triage_inbox` (5 categorías y detección anti-spam con Calendly) y `linkedin_triage_replies` (priorización de hilos en la primera hora).
+- [x] **Carruseles PDF y Reciclaje de Contenido**: `linkedin_carousel_planner` (diapositivas en ratio 4:5 vertical y HTML/CSS) y `linkedin_repurpose_content` (desglose en 4 posts semanales).
+- [x] **Prospección por Mensajería Directa**: `linkedin_dm_sequence` (secuencia en 4 fases con invitación $\le$ 200 caracteres y follow-ups espaciados).
 
 ### 🛡️ Lecciones de Ingeniería y Selectores DOM en 2026
 1. **Inputs Fantasma en `/login`**: LinkedIn inyecta campos ocultos en el DOM para autocompletado y WebAuthn con dimensiones 0 (`visible: false`). Se requiere forzar el pseudoselector `:visible` (`input[type="email"]:visible`, `input[type="password"]:visible`) para evitar `TimeoutError` en Playwright.
@@ -319,14 +326,21 @@ Estado actual del proyecto y próximas funcionalidades planificadas (disponible 
 13. **Inviolabilidad de Navegación y Operación en Segundo Plano**: Prohibición absoluta de secuestrar el foco del usuario mediante `$w.AppActivate`, ventanas emergentes o activación de pestañas visibles. Toda interacción remota en Brave debe operar en background mediante WebSockets CDP de baja latencia sin perturbar el trabajo activo.
 14. **Gobernanza de Identidad en Primera Persona Singular**: Al redactar comunicaciones, publicaciones o comentarios en nombre del creador del proyecto, debe utilizarse estrictamente la primera persona del singular ("mi servidor MCP", "sigo mejorando"), erradicando el uso incorrecto de plurales de modestia ("hicimos", "seguimos").
 
-
-
 ### 📋 Próximas Funcionalidades (Backlog)
 - [ ] **Encuestas Interactivas (Polls)**: Creación y monitorización de votos en encuestas de LinkedIn.
 - [ ] **Publicación Programada Nativa**: Programación de posts diferidos en fecha y hora específica.
-- [ ] **Carruseles y Documentos PDF**: Soporte para publicación de presentaciones diapositiva a diapositiva.
+- [ ] **Subida Automática de Carruseles PDF**: Automatización de subida directa de presentaciones PDF generadas al modal de LinkedIn.
 - [ ] **Exportador de Analíticas**: Volcado estructurado de estadísticas de impresiones y reacciones a formato SQLite y CSV.
-- [ ] **Webhooks Locales**: Notificaciones en tiempo real al recibir mensajes directos en la bandeja de entrada.
+
+---
+
+## 🎖️ Créditos y Agradecimientos
+
+Este servidor MCP se apoya y rinde tributo a las aportaciones técnicas y metodológicas de la comunidad open-source:
+
+* **[Jake Schincariol](https://github.com/Jakeschincariol)** ([opusjake.ai](https://opusjake.ai)): Creador del repositorio y benchmark **[linkedin-agent-skill](https://github.com/Jakeschincariol/linkedin-agent-skill)**, del cual se han adaptado e integrado los motores de heurística anti-detección de IA (`humanize` y `detect`), el catálogo de 21 fórmulas de ganchos (`hooks.json`), la rúbrica de 12 criterios y 100 puntos de perfil (`rubric.json`), las directrices de carruseles PDF verticales en ratio 4:5 y las reglas de triaje para bandeja de entrada y respuestas a publicaciones.
+* **[Daniel Sticker](https://github.com/stickerdaniel)**: Por sus investigaciones pioneras en interacción con mensajería e hilos en `stickerdaniel/linkedin-mcp-server`.
+* **[Elias Biondo](https://github.com/eliasbiondo)**: Por sus avances en la extracción estructurada de datos de perfiles y empresas en `eliasbiondo/linkedin-mcp-server`.
 
 ---
 
