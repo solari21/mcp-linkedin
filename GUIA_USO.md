@@ -62,7 +62,7 @@ graph TB
 El siguiente diagrama de flujo describe la secuencia cronológica de operaciones desde la concepción del contenido hasta el triaje posterior a la publicación, garantizando el cumplimiento de las salvaguardas anti-IA y Human-in-the-Loop:
 
 <p align="center">
-  <img src="assets/diagrama_flujo_mcp_linkedin.png" alt="Diagrama de Flujo Operativo MCP LinkedIn" width="850">
+  <img src="assets/diagrama_flujo_mcp_linkedin.png?v=1.1.0" alt="Diagrama de Flujo Operativo MCP LinkedIn" width="850">
 </p>
 
 ```mermaid

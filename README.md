@@ -102,7 +102,7 @@ graph TB
 El siguiente diagrama de flujo ilustra la secuencia temporal y el ciclo de vida completo de una publicación, orquestando las **32 herramientas** desde la ideación inicial hasta la monitorización post-publicación:
 
 <p align="center">
-  <img src="assets/diagrama_flujo_mcp_linkedin.png" alt="Diagrama de Flujo Operativo MCP LinkedIn" width="850">
+  <img src="assets/diagrama_flujo_mcp_linkedin.png?v=1.1.0" alt="Diagrama de Flujo Operativo MCP LinkedIn" width="850">
 </p>
 
 ```mermaid
