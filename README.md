@@ -8,6 +8,9 @@
   <a href="https://github.com/solari21/mcp-linkedin/pulls"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome" height="20"></a>
 </p>
 
+[![M8ven Score](https://m8ven.ai/badge/mcp/solari21-mcp-linkedin-1ary7v?v=5548754757af8e261538b303ca92cd46)](https://m8ven.ai/mcp/solari21-mcp-linkedin-1ary7v?s=readme)
+
+
 **MCP LinkedIn** es un servidor open-source de alto rendimiento construido sobre el **Model Context Protocol (MCP)**, **FastMCP** y **Playwright**. Permite a asistentes de inteligencia artificial (Claude Desktop, Gemini, Antigravity, Cursor, Cline) interactuar con LinkedIn de forma supervisada, respetuosa y orientada a la productividad profesional.
 
 A diferencia de otros scripts de automatización opacos, **MCP LinkedIn** incorpora una filosofía estricta de **Human-in-the-Loop (HITL)** con salvaguardas obligatorias en dos fases (`confirm=True`) para acciones críticas, emulación de cadencia humana y un Plan B interactivo que permite resolver retos de seguridad sin pérdida de foco.
