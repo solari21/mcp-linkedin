@@ -53,43 +53,41 @@ A diferencia de la secuencia temporal de publicación, la arquitectura de **MCP 
 
 ```mermaid
 graph TB
-    subgraph Layer1 ["🖥️ CAPA 1: CLIENTES MCP (JSON-RPC stdio)"]
-        direction LR
-        C1["Claude Desktop"] ~~~ C2["Cursor IDE"] ~~~ C3["Antigravity / Gemini CLI"]
+    subgraph Layer1 ["🖥️ Capa 1: Entorno de Clientes"]
+        Clients["🤖 Asistentes IA & Agentes MCP (Antigravity · Cursor IDE · Gemini CLI)"]
     end
 
-    subgraph Layer2 ["⚡ CAPA 2: NÚCLEO FASTMCP (linkedin_server.py)"]
+    subgraph Layer2 ["⚡ Capa 2: Núcleo FastMCP (linkedin_server.py)"]
         direction TB
         ServerCore["Gateway FastMCP & Registro de 32 Herramientas"]
-        HITLGuard{"🛡️ Protocolo Human-in-the-Loop\n(confirm=True obligatorio)"}
+        HITLGuard["🛡️ Middleware de Gobernanza HITL (Validación en 2 Fases)"]
         Throttler["⏳ Rate Limiter & Jitter Gaussiano Humano (1.5s - 3.0s)"]
         ServerCore --> HITLGuard
         HITLGuard --> Throttler
     end
 
-    subgraph Layer3 ["🧠 CAPA 3: INTELIGENCIA EDITORIAL & DATOS (linkedin_intelligence.py)"]
+    subgraph Layer3 ["🧠 Capa 3: Inteligencia Editorial & Datos (linkedin_intelligence.py)"]
         direction TB
         subgraph Datasets ["💾 Datasets en Disco (data/)"]
-            D1[("hooks.json\n21 Fórmulas")]
-            D2[("slop.json\n113 Clichés")]
-            D3[("rubric.json\n12 Criterios")]
+            D1[("hooks.json (21 Fórmulas)")]
+            D2[("slop.json (113 Clichés)")]
+            D3[("rubric.json (12 Criterios)")]
         end
         Engines["Motores Heurísticos:\n• Humanizador (3 Pasadas)\n• Detector Anti-IA (5 Checks)\n• Calibrador de Ganchos (140/210 car)\n• Planificador Carruseles 4:5\n• Triaje de Inbox & Respuestas"]
         Datasets -.-> Engines
     end
 
-    subgraph Layer4 ["🌐 CAPA 4: AUTOMATIZACIÓN & PERSISTENCIA (browser.py)"]
+    subgraph Layer4 ["🌐 Capa 4: Automatización & Persistencia (browser.py)"]
         direction TB
         CDPManager["🌐 Conexión Pasiva Brave CDP (Puerto 9222)\nWebSocket Directo a Pestaña Activa"]
-        SessionStore[("💾 storage_state.json\nCookies Normalizadas a .linkedin.com\nPersistencia a 365 días")]
+        SessionStore[("💾 storage_state.json\nCookies Normalizadas a .linkedin.com (365 días)")]
         FallbackPlan["🖥️ Plan B Interactivo Asistido\n(schtasks /IT sin robo de foco)"]
         CDPManager --- SessionStore
         CDPManager -.-> FallbackPlan
     end
 
-    subgraph Layer5 ["💼 CAPA 5: PLATAFORMA DESTINO"]
-        direction LR
-        L1["Feed & Tiptap Multilínea (párrafos)"] ~~~ L2["Bandeja /messaging/"] ~~~ L3["Perfiles & Búsqueda"]
+    subgraph Layer5 ["💼 Capa 5: Plataforma Destino"]
+        LinkedInPlatform["🌐 LinkedIn Web SPA (Feed · Tiptap Multilínea · Inbox · Perfiles)"]
     end
 
     Layer1 ==> Layer2
