@@ -6,9 +6,8 @@
   <a href="https://playwright.dev/"><img src="https://img.shields.io/badge/engine-Playwright-2EAD33.svg?logo=playwright&logoColor=white" alt="Playwright" height="20"></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" height="20"></a>
   <a href="https://github.com/solari21/mcp-linkedin/pulls"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome" height="20"></a>
+  <a href="https://m8ven.ai/mcp/solari21-mcp-linkedin-1ary7v?s=readme"><img src="https://m8ven.ai/badge/mcp/solari21-mcp-linkedin-1ary7v" alt="M8ven Score" height="20"></a>
 </p>
-
-[![M8ven Score](https://m8ven.ai/badge/mcp/solari21-mcp-linkedin-1ary7v)](https://m8ven.ai/mcp/solari21-mcp-linkedin-1ary7v?s=readme)
 
 
 **MCP LinkedIn** es un servidor open-source de alto rendimiento construido sobre el **Model Context Protocol (MCP)**, **FastMCP** y **Playwright**. Permite a asistentes de inteligencia artificial (Claude Desktop, Gemini, Antigravity, Cursor, Cline) interactuar con LinkedIn de forma supervisada, respetuosa y orientada a la productividad profesional.
@@ -345,16 +344,6 @@ El repositorio incluye flujos de trabajo automatizados con GitHub Actions para a
 
 ---
 
-## 🙏 Créditos y Reconocimientos Open Source
-
-Este proyecto se apoya y rinde tributo a las siguientes iniciativas y creadores de la comunidad de código abierto:
-
-* **[@Daniel Sticker (stickerdaniel)](https://github.com/stickerdaniel/linkedin-mcp-server)**: Por los conceptos preliminares de mensajería e integración inicial de MCP con LinkedIn.
-* **[@Elias Biondo (eliasbiondo)](https://github.com/eliasbiondo/linkedin-mcp-server)**: Por las ideas fundacionales sobre extracción modular de datos de perfiles.
-* **[FastMCP](https://github.com/jlowin/fastmcp)**: Por proveer el framework Python más ergonómico y rápido para construir servidores MCP.
-* **[Playwright](https://playwright.dev/)**: Por ofrecer el motor de automatización web más robusto y moderno del ecosistema.
-
----
 
 ## ⚖️ Descargo de Responsabilidad Legal (Legal Disclaimer)
 
@@ -415,13 +404,15 @@ Estado actual del proyecto y próximas funcionalidades planificadas (disponible 
 
 ---
 
-## 🎖️ Créditos y Agradecimientos
+## 🎖️ Créditos y Reconocimientos Open Source
 
-Este servidor MCP se apoya y rinde tributo a las aportaciones técnicas y metodológicas de la comunidad open-source:
+Este proyecto se apoya y rinde tributo a las aportaciones técnicas y metodológicas de la comunidad open-source:
 
 * **[Jake Schincariol](https://github.com/Jakeschincariol)** ([opusjake.ai](https://opusjake.ai)): Creador del repositorio y benchmark **[linkedin-agent-skill](https://github.com/Jakeschincariol/linkedin-agent-skill)**, del cual se han adaptado e integrado los motores de heurística anti-detección de IA (`humanize` y `detect`), el catálogo de 21 fórmulas de ganchos (`hooks.json`), la rúbrica de 12 criterios y 100 puntos de perfil (`rubric.json`), las directrices de carruseles PDF verticales en ratio 4:5 y las reglas de triaje para bandeja de entrada y respuestas a publicaciones.
-* **[Daniel Sticker](https://github.com/stickerdaniel)**: Por sus investigaciones pioneras en interacción con mensajería e hilos en `stickerdaniel/linkedin-mcp-server`.
-* **[Elias Biondo](https://github.com/eliasbiondo)**: Por sus avances en la extracción estructurada de datos de perfiles y empresas en `eliasbiondo/linkedin-mcp-server`.
+* **[@Daniel Sticker (stickerdaniel)](https://github.com/stickerdaniel/linkedin-mcp-server)**: Por los conceptos preliminares de mensajería e integración inicial de MCP con LinkedIn.
+* **[@Elias Biondo (eliasbiondo)](https://github.com/eliasbiondo/linkedin-mcp-server)**: Por las ideas fundacionales sobre extracción modular de datos de perfiles.
+* **[FastMCP](https://github.com/jlowin/fastmcp)**: Por proveer el framework Python más ergonómico y rápido para construir servidores MCP.
+* **[Playwright](https://playwright.dev/)**: Por ofrecer el motor de automatización web más robusto y moderno del ecosistema.
 
 ---
 
