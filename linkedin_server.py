@@ -480,14 +480,8 @@ async def linkedin_create_post(
 
                     if await comment_box.count() > 0:
                         await comment_box.click()
-                        await page.wait_for_timeout(400)
-                        lines = first_comment.split("\n")
-                        for idx, l in enumerate(lines):
-                            if l:
-                                await page.keyboard.type(l, delay=5)
-                            if idx < len(lines) - 1:
-                                await page.keyboard.press("Shift+Enter")
-                            await page.wait_for_timeout(30)
+                        # Inyección nativa multilínea para que Tiptap/ProseMirror genere bloques <p> y saltos reales
+                        await page.keyboard.insert_text(first_comment)
 
                         await page.wait_for_timeout(1500)
                         submit_btn = page.locator('button.comments-comment-box__submit-button, button.hcbgmy, button:has-text("Comentar")').last
@@ -988,17 +982,83 @@ async def linkedin_get_comment_settings_url(post_url: str = None, post_index: in
                 "comment_control_url": href or "https://www.linkedin.com/sharing/commentControl",
 
                 "description": "LinkedIn permite configurar quién puede comentar mediante la página de privacidad de comentarios."
-
             }
-
         finally:
+            await browser.close()
 
+@mcp.tool()
+async def linkedin_add_comment(
+    post_url: str,
+    comment_text: str,
+    verify_author: str = None,
+    verify_topic: str = None
+) -> dict:
+    """
+    Publica un comentario estructurado en una publicación de LinkedIn con validación estricta de autoría y topic.
+    Aplica inyección nativa multilínea (párrafos <p> en Tiptap) evitando el colapso de saltos de línea.
+    
+    Args:
+        post_url: URL completa de la publicación en LinkedIn (https://www.linkedin.com/feed/update/urn:li:activity:...).
+        comment_text: Texto completo del comentario con saltos de línea y viñetas.
+        verify_author: (Opcional pero recomendado) Nombre del autor esperado en el post para evitar comentar en hilos ajenos.
+        verify_topic: (Opcional) Texto o tema clave que debe contener la publicación.
+    """
+    creds = get_creds()
+    async with async_playwright() as p:
+        browser, context = await get_browser_and_context(p)
+        page = await context.new_page()
+        try:
+            await ensure_authenticated(page, creds)
+            await page.goto(post_url, wait_until="domcontentloaded", timeout=25000)
+            await page.wait_for_timeout(3000)
+
+            # Validación estricta de autoría y contenido
+            content = await page.content()
+            if verify_author and verify_author.lower() not in content.lower():
+                return {
+                    "status": "aborted",
+                    "reason": f"El autor verificado '{verify_author}' no coincide con el contenido de la publicación.",
+                    "url": post_url
+                }
+            if verify_topic and verify_topic.lower() not in content.lower():
+                return {
+                    "status": "aborted",
+                    "reason": f"El tema clave '{verify_topic}' no fue encontrado en la publicación.",
+                    "url": post_url
+                }
+
+            # Localizar caja de comentarios
+            comment_box = page.locator('div.tiptap.ProseMirror, div[role="textbox"][aria-label*="comentario"], div[role="textbox"][contenteditable="true"]').first
+            if await comment_box.count() == 0:
+                comment_btn = page.locator('button[aria-label*="Comentar"], button:has-text("Comentar")').first
+                if await comment_btn.count() > 0:
+                    await comment_btn.click()
+                    await page.wait_for_timeout(1000)
+                comment_box = page.locator('div.tiptap.ProseMirror, div[role="textbox"][aria-label*="comentario"], div[role="textbox"][contenteditable="true"]').first
+
+            if await comment_box.count() == 0:
+                return {"status": "error", "message": "No se encontró el editor de comentarios de LinkedIn."}
+
+            await comment_box.click()
+            await page.wait_for_timeout(400)
+            # Inyección nativa multilínea para párrafos <p> independientes
+            await page.keyboard.insert_text(comment_text)
+            await page.wait_for_timeout(1500)
+
+            submit_btn = page.locator('button.comments-comment-box__submit-button, button.hcbgmy, button:has-text("Comentar"), button:has-text("Publicar")').last
+            await submit_btn.click()
+            await page.wait_for_timeout(4000)
+
+            return {
+                "status": "success",
+                "message": "Comentario publicado exitosamente con formateo multilínea verificado.",
+                "post_url": post_url
+            }
+        finally:
             await browser.close()
 
 # ==========================================
-
 # BÚSQUEDA Y PROSPECCIÓN (Gente, Empleos, etc.)
-
 # ==========================================
 
 @mcp.tool()

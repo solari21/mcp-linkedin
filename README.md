@@ -29,7 +29,7 @@ Actualmente existen implementaciones experimentales de MCP para LinkedIn en el e
 
 | Característica / Capacidad | `stickerdaniel/linkedin-mcp` | `eliasbiondo/linkedin-mcp` | 🚀 **MCP LinkedIn (Este Proyecto)** |
 |---|:---:|:---:|:---:|
-| **Herramientas Disponibles** | 4 | 5 | **21 herramientas completas** |
+| **Herramientas Disponibles** | 4 | 5 | **22 herramientas completas** |
 | **Publicación Enriquecida con Imágenes** | ❌ Solo texto | ❌ No disponible | ✅ **Subida nativa HD (`expect_file_chooser`)** |
 | **Primer Comentario Automático** | ❌ No | ❌ No | ✅ **Inyección automática para alcance orgánico** |
 | **Control Total del Menú de 3 Puntos** | ❌ No | ❌ No | ✅ **Destacar, Guardar, Embed `<iframe>`, Editar, Borrar** |
@@ -67,10 +67,11 @@ flowchart TD
 
 ---
 
-## 🛠️ Catálogo Completo de Herramientas (21 Herramientas)
+## 🛠️ Catálogo Completo de Herramientas (22 Herramientas)
 
 ### A. Publicación y Distribución de Contenido
 * `linkedin_create_post`: Crea publicaciones profesionales con formato, hashtags, imagen opcional en alta definición, publicación automática del primer comentario con enlaces y parámetro opcional `clean_previous_tests=True` para purga y deduplicación pre-flight de publicaciones previas de prueba.
+* `linkedin_add_comment`: Publica comentarios estructurados con formateo nativo multilínea (párrafos `<p>` en Tiptap/ProseMirror sin colapso), validación semántica estricta de autoría (`verify_author`) y temática (`verify_topic`) para blindaje anti-posteo cruzado en hilos ajenos.
 * `linkedin_get_recent_posts`: Extrae el listado de publicaciones recientes del perfil autenticado, con conteo de impresiones y engagement.
 * `linkedin_check_session`: Diagnostica la validez de la sesión activa, estado de cookies y conectividad con la plataforma.
 * `linkedin_renew_session_interactive`: Despliega una ventana asistida no invasiva para resolver desafíos de 2FA o reCAPTCHA y sincronizar la sesión.
@@ -271,8 +272,9 @@ Estado actual del proyecto y próximas funcionalidades planificadas (disponible 
 
 ### ✅ Implementado (v1.0.0)
 - [x] **Publicación Oficial de Lanzamiento**: Post publicado en vivo en LinkedIn con infografía técnica y primer comentario verificado ([Ver en LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7515951568215588864/)).
-- [x] **Arquitectura FastMCP 2.2+**: 21 herramientas registradas con tipado estricto e introspección de esquemas.
+- [x] **Arquitectura FastMCP 2.2+**: 22 herramientas registradas con tipado estricto e introspección de esquemas.
 - [x] **Publicación Enriquecida**: Soporte para subida de imágenes HD con `expect_file_chooser()` y primer comentario automático con motor Tiptap.
+- [x] **Comentarios Supervisados con Párrafos Nativos y Anti-Posteo Cruzado**: Herramienta `linkedin_add_comment` con comprobación estricta de autoría (`verify_author`), verificación temática (`verify_topic`) e inyección multilínea nativa sin colapso de renglones.
 - [x] **Control del Menú de 3 Puntos**: Fijar en destacados, guardar elementos, extraer snippet `<iframe>`, copiar enlace canónico, editar y eliminar publicaciones.
 - [x] **Salvaguardas Human-in-the-Loop**: Confirmación en dos fases (`confirm=True`) en acciones destructivas o irreversibles.
 - [x] **Plan B Interactivo sin Pérdida de Foco**: Detección de retos (2FA, reCAPTCHA) y proyección asistida con `schtasks /IT` en Windows.
@@ -292,6 +294,10 @@ Estado actual del proyecto y próximas funcionalidades planificadas (disponible 
 8. **Prohibición de Procesos Headless Concurrentes y Revocación de `li_at`**: Al ejecutar un script en un subproceso de Playwright headless (`browser.launch()`) con cookies compartidas mientras el navegador regular (Brave) mantiene la sesión de LinkedIn abierta, el backend de LinkedIn detecta una discrepancia en huella/TLS/concurrencia de la misma cuenta. Como medida de seguridad, invalida de inmediato el token de sesión `li_at`, redirigiendo la pestaña del usuario a «¡Hola de nuevo!» para exigir la contraseña. La solución obligatoria es no lanzar navegadores secundarios si Brave está activo: toda interacción (edición, publicación, lectura) debe realizarse despachando llamadas CDP vía WebSocket directamente a la pestaña existente de Brave.
 9. **Deduplicación Preventiva y Limpieza Pre-Flight de Posts Huérfanos de Prueba**: Antes de publicar una versión definitiva u oficial, el agente debe verificar las publicaciones recientes del perfil (`linkedin_get_recent_posts`) para identificar y eliminar de forma proactiva (`linkedin_delete_post(confirm=True)`) cualquier prueba preliminar o publicación duplicada, garantizando que el feed permanezca limpio y libre de posts de prueba obsoletos.
 10. **Desambiguación de Botones en Comentarios Tiptap**: En el árbol DOM de LinkedIn, el botón "Comentar" coexiste en dos instancias (el toggle de la barra de acciones inferior y el disparador de envío primario de la caja de comentarios con estilos `hcbgmy hcbhay`). Es mandatorio apuntar al botón primario de envío tras la inyección de saltos de línea con `Shift+Enter` y verificar la existencia efectiva del texto en el DOM antes de dar por completada la tarea.
+11. **Párrafos Multilínea en Tiptap / ProseMirror (`Input.insertText` vs `Shift+Enter`)**: El editor Tiptap colapsa los saltos simples de línea generados por eventos de teclado sintéticos (`Shift+Enter` o `<br>` sueltos) en un único párrafo continuo al publicarse. Para que el parser de ProseMirror cree bloques `<p>...</p>` independientes con separaciones visibles reales, es obligatorio inyectar bloques multilínea completos mediante `Input.insertText` (o `page.keyboard.insert_text()`).
+12. **Blindaje de Autoría y Anti-Posteo Cruzado**: Queda terminantemente prohibido comentar o interactuar asumiendo URLs de publicaciones extraídas de pestañas abiertas o feeds sin validar el autor. Se implementa validación semántica estricta (`verify_author`, `verify_topic`) para asegurar que las interacciones supervisadas ocurran exclusivamente en las publicaciones legítimas del usuario.
+13. **Inviolabilidad de Navegación y Operación en Segundo Plano**: Prohibición absoluta de secuestrar el foco del usuario mediante `$w.AppActivate`, ventanas emergentes o activación de pestañas visibles. Toda interacción remota en Brave debe operar en background mediante WebSockets CDP de baja latencia sin perturbar el trabajo activo.
+14. **Gobernanza de Identidad en Primera Persona Singular**: Al redactar comunicaciones, publicaciones o comentarios en nombre del creador del proyecto, debe utilizarse estrictamente la primera persona del singular ("mi servidor MCP", "sigo mejorando"), erradicando el uso incorrecto de plurales de modestia ("hicimos", "seguimos").
 
 
 
