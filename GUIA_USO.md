@@ -1,4 +1,4 @@
-# Guía Operativa de Uso: Servidor FastMCP LinkedIn (v1.1.0) para Jesús L. Moronta Muñoz
+# Guía Operativa de Uso: Servidor FastMCP LinkedIn (v1.1.0) para Jesús Moronta
 
 Esta guía establece el manual operativo, la arquitectura de ingeniería y los casos de uso prácticos para las **32 herramientas** integradas en el servidor FastMCP [`linkedin_server.py`](file:///c:/Users/solari21.SOLARI21PC/Antigravity%20Projects/MCP%20Linkedin/linkedin_server.py). 
 
@@ -271,6 +271,6 @@ flowchart TD
 
 ## 🎖️ Créditos de la Suite
 
-* **[Jesús L. Moronta Muñoz](https://github.com/solari21)**: Arquitectura global, ingeniería de integración FastMCP, automatización en Brave CDP pasivo, inyección multilínea Tiptap y adaptación bilingüe.
+* **[Jesús Moronta](https://github.com/solari21)**: Arquitectura global, ingeniería de integración FastMCP, automatización en Brave CDP pasivo, inyección multilínea Tiptap y adaptación bilingüe.
 * **[Jake Schincariol](https://github.com/Jakeschincariol)** ([opusjake.ai](https://opusjake.ai)): Benchmark [`linkedin-agent-skill`](https://github.com/Jakeschincariol/linkedin-agent-skill), del cual se han adaptado las 21 fórmulas de ganchos, los motores heurísticos `humanize` y `detect`, la rúbrica de 100 puntos y las reglas de carruseles 4:5.
 * **[Daniel Sticker](https://github.com/stickerdaniel)** y **[Elias Biondo](https://github.com/eliasbiondo)**: Referentes de interacción con mensajería y extracción estructurada de entidades.
