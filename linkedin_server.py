@@ -295,9 +295,21 @@ async def ensure_authenticated(page, creds: dict):
     # desplegar ventana interactiva física de Brave Browser en el escritorio del usuario (/IT).
 
     if needs_interactive:
+        print("[MCP Linkedin] Sesión no detectada. Invocando renovación interactiva en pantalla...")
+        renewed = trigger_interactive_session_renewal(timeout_sec=180)
+        if renewed and STORAGE_STATE_FILE.exists():
+            with open(STORAGE_STATE_FILE, "r", encoding="utf-8") as f:
+                new_st = json.load(f)
+            if "cookies" in new_st and new_st["cookies"]:
+                await page.context.clear_cookies()
+                await page.context.add_cookies(new_st["cookies"])
+                await page.goto("https://www.linkedin.com/feed/", wait_until="commit", timeout=12000)
+                await page.wait_for_timeout(2500)
+                if ("feed" in page.url or "/in/" in page.url) and "login" not in page.url and "checkpoint" not in page.url and "uas" not in page.url:
+                    return page
         raise PermissionError(
-            f"No hay sesión activa de LinkedIn en storage_state.json ni en Brave CDP (URL actual: {page.url}). "
-            "Por favor, inicia sesión en Brave para sincronizarla pasivamente sin ventanas emergentes."
+            f"No se pudo completar el inicio de sesión interactivo o tiempo de espera agotado (URL actual: {page.url}). "
+            "Por favor, completa el login en la ventana interactiva para continuar."
         )
 
     return page
