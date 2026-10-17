@@ -29,7 +29,7 @@ Actualmente existen implementaciones experimentales de MCP para LinkedIn en el e
 
 | Característica / Capacidad | `stickerdaniel/linkedin-mcp` | `eliasbiondo/linkedin-mcp` | 🚀 **MCP LinkedIn (Este Proyecto)** |
 |---|:---:|:---:|:---:|
-| **Herramientas Disponibles** | 4 | 5 | **22 herramientas completas** |
+| **Herramientas Disponibles** | 4 | 5 | **32 herramientas completas** |
 | **Publicación Enriquecida con Imágenes** | ❌ Solo texto | ❌ No disponible | ✅ **Subida nativa HD (`expect_file_chooser`)** |
 | **Primer Comentario Automático** | ❌ No | ❌ No | ✅ **Inyección automática para alcance orgánico** |
 | **Control Total del Menú de 3 Puntos** | ❌ No | ❌ No | ✅ **Destacar, Guardar, Embed `<iframe>`, Editar, Borrar** |
@@ -39,6 +39,8 @@ Actualmente existen implementaciones experimentales de MCP para LinkedIn en el e
 | **Búsqueda 360° en Tiempo Real** | ⚠️ Parcial | ⚠️ Parcial | ✅ **Personas, Empleos con requisitos y Empresas** |
 | **Inbox & Hilos de Conversación** | ⚠️ Básico | ❌ No | ✅ **Lectura de chats, hilos y envío supervisado** |
 | **Emulación de Ritmo Humano** | ❌ Instantáneo | ❌ Instantáneo | ✅ **Jitter aleatorio gaussiano (1.5s - 3.0s)** |
+| **Inteligencia y Filtro Anti-IA Local** | ❌ No | ❌ No | ✅ **Humanizador en 3 pasadas y 5-Check Detection Panel** |
+| **Estrategia y Copywriting Calibrado** | ❌ No | ❌ No | ✅ **21 fórmulas de ganchos, 9 arquetipos de comentarios y carruseles 4:5** |
 
 ---
 
@@ -55,6 +57,12 @@ flowchart TD
         ExecutionEngine --> RateLimiter["⏳ Throttling & Jitter Humano"]
         RateLimiter --> BrowserManager["🌐 Browser Engine (Brave / Chromium)"]
     end
+
+    subgraph Intelligence ["Inteligencia Editorial & Anti-IA"]
+        Server --> AntiAI["🧹 Humanizador & 5-Check Detector (Local)"]
+        Server --> ContentStrategy["🎯 21 Fórmulas de Ganchos & Carruseles"]
+        Server --> TriageEngine["📬 Triaje Inbox & Hilos (Leads/Spam)"]
+    end
     
     subgraph Resilience ["Resiliencia y Sesión"]
         BrowserManager --> CookieSanitizer["🧹 Sanitizador Anti-HTTP 999"]
@@ -67,7 +75,7 @@ flowchart TD
 
 ---
 
-## 🛠️ Catálogo Completo de Herramientas (22 Herramientas)
+## 🛠️ Catálogo Completo de Herramientas (32 Herramientas)
 
 ### A. Publicación y Distribución de Contenido
 * `linkedin_create_post`: Crea publicaciones profesionales con formato, hashtags, imagen opcional en alta definición, publicación automática del primer comentario con enlaces y parámetro opcional `clean_previous_tests=True` para purga y deduplicación pre-flight de publicaciones previas de prueba.
@@ -100,6 +108,18 @@ flowchart TD
 * `linkedin_get_feed_posts`: Extrae las publicaciones destacadas del feed principal con conteo de reacciones.
 * `linkedin_get_job_details`: Desglose exhaustivo de ofertas de empleo (requisitos clave, descripción íntegra y modalidad).
 * `linkedin_get_company_details`: Información corporativa institucional (sector, tamaño de plantilla, sede y especialidades).
+
+### F. Inteligencia Editorial, Copywriting y Heurística Anti-IA (Jakeschincariol Benchmark)
+* `linkedin_humanize`: Limpieza de texto en 3 pasadas eliminando caracteres invisibles (zero-width, BOMs), normalizando tipografía no estándar (em-dashes a comas, comillas curvadas) y reemplazando 113+ términos vacíos corporativos (slop) con protección estricta de URLs.
+* `linkedin_detect_ai`: Panel de 5 verificaciones (Burstiness, Specificity, Slop Density, Fingerprint, Voice) con veredicto PASS/REVIEW/FLAGGED y puntuación humana 0-100 sin coste de API externa.
+* `linkedin_hook_score`: Calibrador de ganchos contra 21 fórmulas probadas (`hooks.json`) con verificación de visibilidad móvil ($\le$ 140 car) y escritorio ($\le$ 210 car) antes de "Ver más".
+* `linkedin_score_profile`: Auditoría del perfil autenticado o de terceros contra la rúbrica objetiva de 12 elementos (100 puntos totales) con plan de acción prioritario *Fix-First*.
+* `linkedin_generate_comment`: Generador de comentarios profesionales basado en 9 arquetipos de alto impacto (dato, caso límite, recibo, desacuerdo constructivo) erradicando comentarios vacíos ("¡Gran post!").
+* `linkedin_triage_inbox`: Extracción y clasificación automática del inbox en LEAD, RECRUITER, PEER, ASK y SPAM (identificando bots y secuencias frías con Calendly).
+* `linkedin_triage_replies`: Triaje de comentarios bajo publicaciones propias en 5 niveles estratégicos para priorizar respuestas y maximizar el dwell time en la primera hora.
+* `linkedin_carousel_planner`: Arquitectura diapositiva a diapositiva de carruseles PDF verticales (1080x1350 px, ratio 4:5) con menos de 25 palabras por slide y plantilla HTML/CSS para imprimir.
+* `linkedin_repurpose_content`: Desglose de contenido largo (vídeos, transcripciones, artículos) en afirmaciones, números, historias y mecanismos con propuesta de calendario semanal de 4 publicaciones.
+* `linkedin_dm_sequence`: Generador de secuencias de prospección en 4 pasos con nota de invitación estrictamente $\le$ 200 caracteres y 2 follow-ups espaciados.
 
 ---
 
