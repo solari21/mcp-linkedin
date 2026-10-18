@@ -11,6 +11,12 @@
   <a href="https://m8ven.ai/mcp/solari21-mcp-linkedin-1ary7v?s=readme"><img src="https://m8ven.ai/badge/mcp/solari21-mcp-linkedin-1ary7v" alt="M8ven Score" height="20"></a>
 </p>
 
+<p align="center">
+  <a href="README.md"><img src="https://img.shields.io/badge/Espa%C3%B1ol-Activo-orange?style=for-the-badge&logo=readme&logoColor=white" alt="Versión en Español" /></a>
+  &nbsp;&nbsp;
+  <a href="README_EN.md"><img src="https://img.shields.io/badge/English-Switch-blue?style=for-the-badge&logo=googletranslate&logoColor=white" alt="Switch to English" /></a>
+</p>
+
 
 **MCP LinkedIn** es un servidor open-source de alto rendimiento construido sobre el **Model Context Protocol (MCP)**, **FastMCP** y **Playwright**. Permite a asistentes de inteligencia artificial (Claude Desktop, Gemini, Antigravity, Cursor, Cline) interactuar con LinkedIn de forma supervisada, respetuosa y orientada a la productividad profesional.
 
