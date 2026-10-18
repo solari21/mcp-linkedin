@@ -2,6 +2,9 @@
 
 Lista de tareas, funcionalidades activas y backlog evolutivo para el servidor **MCP LinkedIn**.
 
+> 📌 **Tablero de Seguimiento en Vivo**: Consulta el estado en tiempo real en [MCP LinkedIn Roadmap & Development (GitHub Projects V2)](https://github.com/users/solari21/projects/2).
+> 📦 **Releases Oficiales**: Consulta los paquetes y notas de versión en [GitHub Releases](https://github.com/solari21/mcp-linkedin/releases).
+
 ---
 
 ## 🚀 Versión 1.0.0 (Lanzamiento Inicial - Completado)
@@ -80,6 +83,13 @@ Lista de tareas, funcionalidades activas y backlog evolutivo para el servidor **
 - [x] **Triaje de Interacciones y Detección de Bots**:
   - [x] Triaje automatizado de la bandeja de entrada (`linkedin_triage_inbox`) en LEAD, RECRUITER, PEER, ASK y SPAM, detectando secuencias frías automatizadas.
   - [x] Triaje de respuestas a publicaciones propias (`linkedin_triage_replies`) para priorizar debate y leads en la primera hora de publicación.
+
+- [x] **Distribución Oficial y Automatización Continua (CI/CD)**:
+  - [x] Publicación oficial de la Release `v1.1.0` en [GitHub Releases](https://github.com/solari21/mcp-linkedin/releases/tag/v1.1.0) con binarios precompilados (`.whl` y `.tar.gz`).
+  - [x] Inclusión del módulo `linkedin_cdp.py` en `py-modules` de `pyproject.toml` para empaquetado 100% íntegro.
+  - [x] Workflow de Auto-Release en push a `main` (`.github/workflows/publish_package.yml`) con resolución dinámica de versión (`tomllib`) y `action-gh-release@v2`.
+  - [x] Norma canónica *Release Exit Gate* en `AGENTS.md` (Regla 0.8) y `github-automation` (`SKILL.md`).
+  - [x] Sincronización continua de hitos en el tablero Kanban [MCP LinkedIn Roadmap](https://github.com/users/solari21/projects/2).
 
 ---
 

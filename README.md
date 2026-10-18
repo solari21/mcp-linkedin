@@ -4,6 +4,8 @@
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue.svg?logo=python&logoColor=white" alt="Python" height="20"></a>
   <a href="https://modelcontextprotocol.io/"><img src="https://img.shields.io/badge/MCP%20SDK-FastMCP-8A2BE2.svg" alt="MCP SDK" height="20"></a>
   <a href="https://playwright.dev/"><img src="https://img.shields.io/badge/engine-Playwright-2EAD33.svg?logo=playwright&logoColor=white" alt="Playwright" height="20"></a>
+  <a href="https://github.com/solari21/mcp-linkedin/releases"><img src="https://img.shields.io/github/v/release/solari21/mcp-linkedin?logo=github&color=blue" alt="GitHub Release" height="20"></a>
+  <a href="https://github.com/users/solari21/projects/2"><img src="https://img.shields.io/badge/Roadmap-Projects%20V2-orange?logo=github" alt="Roadmap Projects V2" height="20"></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" height="20"></a>
   <a href="https://github.com/solari21/mcp-linkedin/pulls"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome" height="20"></a>
   <a href="https://m8ven.ai/mcp/solari21-mcp-linkedin-1ary7v?s=readme"><img src="https://m8ven.ai/badge/mcp/solari21-mcp-linkedin-1ary7v" alt="M8ven Score" height="20"></a>
@@ -379,6 +381,7 @@ Estado actual del proyecto y próximas funcionalidades planificadas (disponible 
 - [x] **Triaje de Inbox y Respuestas**: `linkedin_triage_inbox` (5 categorías y detección anti-spam con Calendly) y `linkedin_triage_replies` (priorización de hilos en la primera hora).
 - [x] **Carruseles PDF y Reciclaje de Contenido**: `linkedin_carousel_planner` (diapositivas en ratio 4:5 vertical y HTML/CSS) y `linkedin_repurpose_content` (desglose en 4 posts semanales).
 - [x] **Prospección por Mensajería Directa**: `linkedin_dm_sequence` (secuencia en 4 fases con invitación $\le$ 200 caracteres y follow-ups espaciados).
+- [x] **Distribución Oficial y Auto-Release CI/CD**: Publicación oficial en [GitHub Releases](https://github.com/solari21/mcp-linkedin/releases) con binarios precompilados Wheel (`.whl`) y tarball (`.tar.gz`), workflow automatizado en cada push a `main` y sincronización transversal continua con el tablero [Projects V2 #2 (Roadmap)](https://github.com/users/solari21/projects/2).
 
 ### 🛡️ Lecciones de Ingeniería y Selectores DOM en 2026
 1. **Inputs Fantasma en `/login`**: LinkedIn inyecta campos ocultos en el DOM para autocompletado y WebAuthn con dimensiones 0 (`visible: false`). Se requiere forzar el pseudoselector `:visible` (`input[type="email"]:visible`, `input[type="password"]:visible`) para evitar `TimeoutError` en Playwright.
