@@ -3,11 +3,13 @@ name: Build & Release Package Distribution
 on:
   release:
     types: [published]
+  push:
+    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
   build-and-release:
-    name: Build & Attach Assets to Release
+    name: Build & Release Package Distribution
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -15,6 +17,8 @@ jobs:
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: 🐍 Set up Python 3.11
         uses: actions/setup-python@v5
@@ -26,6 +30,21 @@ jobs:
           python -m pip install --upgrade pip
           pip install build twine
 
+      - name: 🏷️ Resolve Package Version & Tag
+        id: resolve-version
+        run: |
+          python -c '
+          import os, tomllib
+          with open("pyproject.toml", "rb") as f:
+              data = tomllib.load(f)
+          ver = data.get("project", {}).get("version", "1.0.0")
+          tag = f"v{ver}"
+          print(f"Versión detectada: {ver} -> Tag: {tag}")
+          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as env:
+              env.write(f"RELEASE_TAG={tag}\n")
+              env.write(f"PACKAGE_VERSION={ver}\n")
+          '
+
       - name: 🛠️ Build distribution packages (wheel & sdist)
         run: |
           python -m build
@@ -34,10 +53,13 @@ jobs:
         run: |
           twine check dist/*
 
-      - name: 🚀 Attach Precompiled Binaries to GitHub Release
+      - name: 🚀 Publish or Update GitHub Release with Assets
         uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'release'
         with:
+          tag_name: ${{ github.event.release.tag_name || env.RELEASE_TAG }}
+          name: ${{ github.event.release.name || format('v{0} - Distribución Oficial', env.PACKAGE_VERSION) }}
           files: dist/*
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
