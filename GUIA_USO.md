@@ -8,6 +8,10 @@ El ecosistema combina la **automatización de navegador en vivo más segura y si
 
 ## 🏗️ Arquitectura del Sistema
 
+<p align="center">
+  <img src="assets/infografia_mcp_linkedin.png?v=1.1.0" alt="Arquitectura del Servidor FastMCP LinkedIn v1.1.0" width="850">
+</p>
+
 A nivel de ingeniería, **MCP LinkedIn** se organiza en un modelo arquitectónico de 5 capas desacopladas que segregan las interfaces cliente, la orquestación FastMCP, los motores heurísticos de inteligencia con sus datasets en disco, el subsistema de automatización pasiva y la plataforma destino:
 
 ```mermaid

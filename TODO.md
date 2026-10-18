@@ -87,7 +87,8 @@ Lista de tareas, funcionalidades activas y backlog evolutivo para el servidor **
 - [x] **Distribución Oficial y Automatización Continua (CI/CD)**:
   - [x] Publicación oficial de la Release `v1.1.0` en [GitHub Releases](https://github.com/solari21/mcp-linkedin/releases/tag/v1.1.0) con binarios precompilados (`.whl` y `.tar.gz`).
   - [x] Inclusión del módulo `linkedin_cdp.py` en `py-modules` de `pyproject.toml` para empaquetado 100% íntegro.
-  - [x] Workflow de Auto-Release en push a `main` (`.github/workflows/publish_package.yml`) con resolución dinámica de versión (`tomllib`) y `action-gh-release@v2`.
+  - [x] Workflow de Auto-Release en push a `main` (`.github/workflows/publish_package.yml`) con resolución dinámica de versión (`resolve_version.py`), anti-duplicación de changelogs y `action-gh-release@v3` (Node 24 sin advertencias).
+  - [x] Infografía y Diagrama de Arquitectura de 5 capas y 6 bloques funcionales diseñado bajo el estándar editorial canónico `diagram-design` (HTML + SVG standalone y PNG de alta resolución sin distorsión).
   - [x] Norma canónica *Release Exit Gate* en `AGENTS.md` (Regla 0.8) y `github-automation` (`SKILL.md`).
   - [x] Sincronización continua de hitos en el tablero Kanban [MCP LinkedIn Roadmap](https://github.com/users/solari21/projects/2).
 
