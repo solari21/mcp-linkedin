@@ -21,12 +21,6 @@ A diferencia de otros scripts de automatización opacos, **MCP LinkedIn** incorp
 
 ---
 
-<p align="center">
-  <img src="assets/infografia_mcp_linkedin.png?v=1.1.0" alt="Arquitectura del Servidor FastMCP LinkedIn v1.1.0" width="850">
-</p>
-
----
-
 ## 🌟 ¿Por qué MCP LinkedIn? (Comparativa Competitiva)
 
 Actualmente existen implementaciones experimentales de MCP para LinkedIn en el ecosistema open source. La siguiente tabla resume las diferencias clave de ingeniería y fiabilidad:
@@ -52,50 +46,9 @@ Actualmente existen implementaciones experimentales de MCP para LinkedIn en el e
 
 A diferencia de la secuencia temporal de publicación, la arquitectura de **MCP LinkedIn** es un modelo modular desacoplado en 5 capas que separa limpiamente las interfaces de cliente, la lógica de control, los motores heurísticos de inteligencia, la persistencia de cookies y la interacción en el navegador:
 
-```mermaid
-graph TB
-    subgraph Layer1 ["🖥️ Capa 1: Entorno de Clientes"]
-        Clients["🤖 Asistentes IA & Agentes MCP (Antigravity · Cursor IDE · Gemini CLI)"]
-    end
-
-    subgraph Layer2 ["⚡ Capa 2: Núcleo FastMCP (linkedin_server.py)"]
-        direction TB
-        ServerCore["Gateway FastMCP & Registro de 32 Herramientas"]
-        HITLGuard["🛡️ Middleware de Gobernanza HITL (Validación en 2 Fases)"]
-        Throttler["⏳ Rate Limiter & Jitter Gaussiano Humano (1.5s - 3.0s)"]
-        ServerCore --> HITLGuard
-        HITLGuard --> Throttler
-    end
-
-    subgraph Layer3 ["🧠 Capa 3: Inteligencia Editorial & Datos (linkedin_intelligence.py)"]
-        direction TB
-        subgraph Datasets ["💾 Datasets en Disco: data/"]
-            D1[("hooks.json (21 Fórmulas)")]
-            D2[("slop.json (113 Clichés)")]
-            D3[("rubric.json (12 Criterios)")]
-        end
-        Engines["Motores Heurísticos:\n• Humanizador (3 Pasadas)\n• Detector Anti-IA (5 Checks)\n• Calibrador de Ganchos (140/210 car)\n• Planificador Carruseles 4:5\n• Triaje de Inbox & Respuestas"]
-        D3 -.-> Engines
-    end
-
-    subgraph Layer4 ["🌐 Capa 4: Automatización & Persistencia (browser.py)"]
-        direction TB
-        CDPManager["🌐 Conexión Pasiva Brave CDP (Puerto 9222)\nWebSocket Directo a Pestaña Activa"]
-        SessionStore[("💾 storage_state.json\nCookies Normalizadas a .linkedin.com (365 días)")]
-        FallbackPlan["🖥️ Plan B Interactivo Asistido\n(schtasks /IT sin robo de foco)"]
-        CDPManager --- SessionStore
-        CDPManager -.-> FallbackPlan
-    end
-
-    subgraph Layer5 ["💼 Capa 5: Plataforma Destino"]
-        LinkedInPlatform["🌐 LinkedIn Web SPA (Feed · Tiptap Multilínea · Inbox · Perfiles)"]
-    end
-
-    Layer1 ==> Layer2
-    Layer2 <==> Layer3
-    Layer2 ==> Layer4
-    Layer4 ==> Layer5
-```
+<p align="center">
+  <img src="assets/infografia_mcp_linkedin.png?v=1.1.0" alt="Arquitectura del Servidor FastMCP LinkedIn v1.1.0" width="850">
+</p>
 
 ---
 
@@ -106,54 +59,6 @@ El siguiente diagrama de flujo ilustra la secuencia temporal y el ciclo de vida 
 <p align="center">
   <img src="assets/diagrama_flujo_mcp_linkedin.png?v=1.1.0" alt="Diagrama de Flujo Operativo MCP LinkedIn" width="850">
 </p>
-
-```mermaid
-flowchart TD
-    Start(["💡 Inicio: Idea, Activo Largo o Solicitud"]) --> Repurpose["🔄 linkedin_repurpose_content\nDesglose de ideas, cifras y mecanismos"]
-    
-    subgraph Step1 ["1. Redacción y Estrategia Editorial"]
-        Repurpose --> FormatChoice{"¿Formato de Publicación?"}
-        FormatChoice -->|"Post de Feed"| HookDraft["✍️ Redacción de Gancho (Líneas 1-2)"]
-        FormatChoice -->|"Carrusel PDF"| CarouselPlan["📑 linkedin_carousel_planner\nEstructura vertical 4:5 + HTML/CSS"]
-        FormatChoice -->|"Comentario de Valor"| CommentGen["💬 linkedin_generate_comment\n9 Arquetipos (El Recibo, Desacuerdo...)"]
-        
-        HookDraft --> HookEval["🎯 linkedin_hook_score\nValidación contra 21 Fórmulas\nMóvil (<=140 car) | Escritorio (<=210 car)"]
-    end
-
-    subgraph Step2 ["2. Blindaje Heurístico Anti-IA"]
-        HookEval --> Humanize["🧹 linkedin_humanize\nLimpieza 3 Pasadas: Invisibles, Em-dashes, Slop"]
-        CarouselPlan --> Humanize
-        CommentGen --> Humanize
-        
-        Humanize --> AIDetect["🔬 linkedin_detect_ai\nPanel 5 Verificaciones Heurísticas\n(Burstiness, Specificity, Slop, Fingerprint, Voice)"]
-        AIDetect --> ScoreCheck{"¿Score Humano >= 80?\n(Veredicto PASS)"}
-        ScoreCheck -->|"REVIEW / FLAGGED"| Refine["✏️ Refinar métrica débil (ej. Burstiness)"]
-        Refine --> Humanize
-    end
-
-    subgraph Step3 ["3. Gobernanza Human-in-the-Loop (HITL)"]
-        ScoreCheck -->|"PASS"| DraftPresentation["🛑 Presentar Borrador al Usuario\n(Texto, Imagen HD, Primer Comentario con Enlace)"]
-        DraftPresentation --> UserApproval{"¿Aprobación Explícita?\n('OK' / 'Adelante')"}
-        UserApproval -->|"No / Cambios"| EditDraft["✏️ Ajustes solicitados"]
-        EditDraft --> DraftPresentation
-        UserApproval -->|"confirm=True"| DispatchLive["🚀 Despacho de Ejecución en Vivo"]
-    end
-
-    subgraph Step4 ["4. Ejecución en Vivo y Conexión Pasiva CDP"]
-        DispatchLive --> BraveCDP["🌐 Brave Browser CDP (Puerto 9222)\nConexión WebSocket directa a pestaña activa\n(0 Robo de Foco, 0 Revocación de li_at)"]
-        BraveCDP --> TiptapExec["📝 Editor Tiptap / ProseMirror\nInyección multilínea Input.insertText (párrafos <p>)\nSubida HD expect_file_chooser()\nPrimer comentario con enlaces"]
-        TiptapExec --> VerifyDOM["✅ Verificación de Publicación en DOM"]
-    end
-
-    subgraph Step5 ["5. Monitorización, Triaje y Optimización"]
-        VerifyDOM --> Wait45["⏳ Espera 45-60 min (Recepción de Interacciones)"]
-        Wait45 --> TriageReplies["⚡ linkedin_triage_replies\nClasificación en 5 Niveles:\nLEAD, SUBSTANCE, PEER, SUPPORT, NOISE"]
-        TriageReplies --> PrioritizedResponse["🎯 Responder con prioridad máxima a LEAD y SUBSTANCE"]
-        
-        VerifyDOM -.-> RoutineInbox["📬 linkedin_triage_inbox\nFiltrado de Spam (Calendly) y Detección de Leads"]
-        VerifyDOM -.-> RoutineProfile["📊 linkedin_score_profile\nAuditoría Perfil 100 Pts + Plan Fix-First"]
-    end
-```
 
 ---
 
