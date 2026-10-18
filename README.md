@@ -22,7 +22,7 @@ A diferencia de otros scripts de automatización opacos, **MCP LinkedIn** incorp
 ---
 
 <p align="center">
-  <img src="assets/infografia_mcp_linkedin.png" alt="MCP LinkedIn Infografía" width="850">
+  <img src="assets/infografia_mcp_linkedin.png?v=1.1.0" alt="Arquitectura del Servidor FastMCP LinkedIn v1.1.0" width="850">
 </p>
 
 ---

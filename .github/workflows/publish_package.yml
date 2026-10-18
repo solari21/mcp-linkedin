@@ -16,12 +16,12 @@ jobs:
 
     steps:
       - name: 📥 Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: 🐍 Set up Python 3.11
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
@@ -34,15 +34,17 @@ jobs:
         id: resolve-version
         run: |
           python -c '
-          import os, tomllib
+          import os, tomllib, subprocess
           with open("pyproject.toml", "rb") as f:
               data = tomllib.load(f)
           ver = data.get("project", {}).get("version", "1.0.0")
           tag = f"v{ver}"
-          print(f"Versión detectada: {ver} -> Tag: {tag}")
+          tag_exists = subprocess.run(["git", "tag", "-l", tag], capture_output=True, text=True).stdout.strip() == tag
+          print(f"Versión detectada: {ver} -> Tag: {tag} (Existe localmente: {tag_exists})")
           with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as env:
               env.write(f"RELEASE_TAG={tag}\n")
               env.write(f"PACKAGE_VERSION={ver}\n")
+              env.write(f"GENERATE_NOTES={'false' if tag_exists else 'true'}\n")
           '
 
       - name: 🛠️ Build distribution packages (wheel & sdist)
@@ -54,12 +56,12 @@ jobs:
           twine check dist/*
 
       - name: 🚀 Publish or Update GitHub Release with Assets
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ github.event.release.tag_name || env.RELEASE_TAG }}
           name: ${{ github.event.release.name || format('v{0} - Distribución Oficial', env.PACKAGE_VERSION) }}
           files: dist/*
-          generate_release_notes: true
+          generate_release_notes: ${{ env.GENERATE_NOTES == 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
