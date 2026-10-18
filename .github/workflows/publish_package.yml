@@ -32,20 +32,7 @@ jobs:
 
       - name: 🏷️ Resolve Package Version & Tag
         id: resolve-version
-        run: |
-          python -c '
-          import os, tomllib, subprocess
-          with open("pyproject.toml", "rb") as f:
-              data = tomllib.load(f)
-          ver = data.get("project", {}).get("version", "1.0.0")
-          tag = f"v{ver}"
-          tag_exists = subprocess.run(["git", "tag", "-l", tag], capture_output=True, text=True).stdout.strip() == tag
-          print(f"Versión detectada: {ver} -> Tag: {tag} (Existe localmente: {tag_exists})")
-          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as env:
-              env.write(f"RELEASE_TAG={tag}\n")
-              env.write(f"PACKAGE_VERSION={ver}\n")
-              env.write(f"GENERATE_NOTES={'false' if tag_exists else 'true'}\n")
-          '
+        run: python .github/scripts/resolve_version.py
 
       - name: 🛠️ Build distribution packages (wheel & sdist)
         run: |
