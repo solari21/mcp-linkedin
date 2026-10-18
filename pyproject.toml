@@ -52,7 +52,7 @@ mcp-linkedin = "linkedin_server:main"
 linkedin-mcp = "linkedin_server:main"
 
 [tool.setuptools]
-py-modules = ["linkedin_server", "linkedin_extended", "linkedin_interactive_login", "linkedin_intelligence"]
+py-modules = ["linkedin_server", "linkedin_extended", "linkedin_interactive_login", "linkedin_intelligence", "linkedin_cdp"]
 
 [tool.setuptools.package-data]
 "*" = ["data/*.json", "assets/*"]
