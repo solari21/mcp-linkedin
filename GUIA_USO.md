@@ -194,4 +194,5 @@ flowchart TD
 
 * **[Jesús Moronta](https://github.com/solari21)**: Arquitectura global, ingeniería de integración FastMCP, automatización en Brave CDP pasivo, inyección multilínea Tiptap y adaptación bilingüe.
 * **[Jake Schincariol](https://github.com/Jakeschincariol)** ([opusjake.ai](https://opusjake.ai)): Benchmark [`linkedin-agent-skill`](https://github.com/Jakeschincariol/linkedin-agent-skill), del cual se han adaptado las 21 fórmulas de ganchos, los motores heurísticos `humanize` y `detect`, la rúbrica de 100 puntos y las reglas de carruseles 4:5.
+* **[morluto/rea](https://github.com/morluto/rea)** (Reverse Engineer Anything): Marco de ingeniería inversa e inspección pasiva para la API Voyager Rest.li, diagnóstico pre-vuelo CDP y arquitectura móvil Android.
 * **[Daniel Sticker](https://github.com/stickerdaniel)** y **[Elias Biondo](https://github.com/eliasbiondo)**: Referentes de interacción con mensajería y extracción estructurada de entidades.
