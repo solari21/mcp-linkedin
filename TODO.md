@@ -95,7 +95,42 @@ Lista de tareas, funcionalidades activas y backlog evolutivo para el servidor **
 
 ---
 
-## 🔮 Versión 1.2.0 (Próximas Funcionalidades / Backlog)
+## 🚀 Versión 1.2.0 (Integración con REA MCP - Completado)
+
+- [x] **Sinergia A: Migración de Lectura a API Privada Voyager (Rest.li 2.0)**:
+  - [x] Deserializador y normalizador Rest.li 2.0 (`linkedin_voyager.py`) para perfiles (`dash/profiles`), feed (`dash/updates`), ofertas de empleo y empresas.
+  - [x] Desacoplamiento total del raspado de DOM y clases CSS en operaciones de lectura e inteligencia.
+  - [x] Enrutamiento híbrido automático: prioridad Voyager API por WebSocket/CDP con fallback transparente a selectores DOM (`linkedin_extended.py`).
+
+- [x] **Sinergia B: Diagnóstico Pasivo Pre-Vuelo y Auditoría Silenciosa de Sesión**:
+  - [x] Auditoría atómica de cookies (`li_at`, `JSESSIONID`, `bcookie`, `bscookie`, `li_rm`) en `< 0.05 s` por WebSocket CDP (`linkedin_preflight.py`).
+  - [x] Verificación de sesión sin evaluar JavaScript en el contexto del sitio, inmune a bucles de redirección `HTTP 302` y cabeceras `Clear-Site-Data: "storage"`.
+  - [x] Nueva herramienta MCP `linkedin_rea_check_preflight` para inspección de seguridad previa a envíos o publicaciones.
+
+- [x] **Sinergia C: Mapeo e Ingeniería Inversa de la Arquitectura Móvil Android**:
+  - [x] Mapeo de especificaciones oficiales de la aplicación `com.linkedin.android` (`linkedin_mobile_api.py`).
+  - [x] Cabeceras de firma móvil `X-Li-User-Agent`, `X-RestLi-Protocol-Version` y rutas Rest.li optimizadas para bajo ancho de banda.
+  - [x] Decodificador nativo AXML del string pool (Chunk `0x0001`) para inspeccionar permisos, actividades y componentes en APKs reales sin stubs ni dependencias pesadas.
+  - [x] Nueva herramienta MCP `linkedin_rea_inspect_apk` con modos `spec` y `extract`.
+
+- [x] **Sinergia D: Telemetría Algorítmica y Optimización de Dwell Time**:
+  - [x] Modelo de retención y análisis de eventos de telemetría de LinkedIn (`linkedin_dwell.py`) conforme a los umbrales de ingeniería (<1.0s micro-dwell, $\ge$1.5s impresión cualificada, $\ge$4.0s boost de alcance 2.2x).
+  - [x] Cálculo del índice DTPI (0-100) y puntos de corte del pliegue (*fold cutoffs*: 140 caracteres en móvil, 210 caracteres en desktop).
+  - [x] Integración de telemetría de retención en el evaluador de ganchos (`linkedin_hook_score`).
+  - [x] Nueva herramienta MCP `linkedin_analyze_dwell_time`.
+
+- [x] **Validación y Distribución Oficial v1.2.0**:
+  - [x] Ampliación del servidor FastMCP de 32 a 37 herramientas operativas (`linkedin_server.py`).
+  - [x] Auditoría AST limpia (`0 NameError`) en el 100% de los módulos Python.
+  - [x] Suite de 9 pruebas empíricas reales en `scratch/test_suite_rea_linkedin.py` superada al 100%.
+  - [x] Certificación formal del Árbitro Adversarial bajo el protocolo Gauntlet Loop (`autonomous-adversarial-loop`).
+  - [x] Paquetes binarios v1.2.0 precompilados en `dist/` (`.whl` y `.tar.gz`).
+  - [x] Publicación oficial de la Release `v1.2.0` en [GitHub Releases](https://github.com/solari21/mcp-linkedin/releases/tag/v1.2.0).
+  - [x] Sincronización bilingüe de documentación (`README.md`, `README_EN.md`, `GUIA_USO.md`, `task.md`, `walkthrough.md`).
+
+---
+
+## 🔮 Versión 1.3.0 (Próximas Funcionalidades / Backlog)
 
 - [ ] **Encuestas Interactivas (Polls)**:
   - [ ] Herramienta para crear encuestas con opciones múltiples y duración configurable.
