@@ -1,6 +1,6 @@
-# Guía Operativa de Uso: Servidor FastMCP LinkedIn (v1.1.0) de Jesús Moronta
+# Guía Operativa de Uso: Servidor FastMCP LinkedIn (v1.2.0) de Jesús Moronta
 
-Esta guía establece el manual operativo, la arquitectura de ingeniería y los casos de uso prácticos para las **32 herramientas** integradas en el servidor FastMCP [`linkedin_server.py`](file:///c:/Users/solari21.SOLARI21PC/Antigravity%20Projects/MCP%20Linkedin/linkedin_server.py). 
+Esta guía establece el manual operativo, la arquitectura de ingeniería y los casos de uso prácticos para las **37 herramientas** integradas en el servidor FastMCP [`linkedin_server.py`](file:///c:/Users/solari21.SOLARI21PC/Antigravity%20Projects/MCP%20Linkedin/linkedin_server.py). 
 
 El ecosistema combina la **automatización de navegador en vivo más segura y sigilosa** (vía Brave Browser CDP pasivo, Playwright e inyección multilínea en Tiptap) con la **suite de inteligencia editorial, copywriting estratégico y heurística anti-detección de IA** inspirada en el benchmark de Jake Schincariol ([`linkedin-agent-skill`](https://github.com/Jakeschincariol/linkedin-agent-skill)).
 
@@ -38,7 +38,7 @@ El siguiente diagrama de flujo describe la secuencia cronológica de operaciones
 
 ---
 
-## 📋 Catálogo Completo de Herramientas FastMCP (32 Herramientas)
+## 📋 Catálogo Completo de Herramientas FastMCP (37 Herramientas)
 
 ### Bloque 1: Publicación y Distribución de Contenido (5 Herramientas)
 
@@ -111,6 +111,16 @@ El siguiente diagrama de flujo describe la secuencia cronológica de operaciones
 | **30** | `linkedin_carousel_planner` | Diseñar la arquitectura diapositiva a diapositiva de un carrusel PDF vertical (4:5). | *"Diseña un carrusel de 10 diapositivas sobre cómo evitar la revocación de sesiones en LinkedIn."* | Portada ($\le$ 6 palabras), láminas de una sola idea ($\le$ 25 palabras), lámina de recapitulación guardable y HTML/CSS listo para PDF. |
 | **31** | `linkedin_repurpose_content` | Desglosar contenidos largos (artículos, vídeos, transcripciones) en publicaciones atómicas. | *"Desglosa esta transcripción técnica de 20 minutos en 4 publicaciones para la semana."* | Extrae afirmaciones polémicas, números, mecanismos e historias, asignando una fórmula de gancho a cada día. |
 | **32** | `linkedin_dm_sequence` | Diseñar secuencias de prospección privada en 4 fases respetando límites de LinkedIn. | *"Prepara la secuencia de DM para Elena tras conectar sobre servidores FastMCP."* | Nota de invitación estrictamente $\le$ 200 caracteres (sin pedir nada), 1er DM de valor (+1 día) y 2 follow-ups espaciados (+4 y +10 días). |
+
+### Bloque 7: Integración REA MCP: Voyager API, Diagnóstico Pasivo y Telemetría Algorítmica (5 Herramientas)
+
+| # | Herramienta FastMCP | Propósito Operativo | Prompt de Ejemplo en Antigravity | Resultado Clave Obtenido |
+|:---:|:---|:---|:---|:---|
+| **33** | `linkedin_passive_preflight` | Auditoría pasiva pre-vuelo por CDP/almacenamiento en 0.05s sin evaluar JavaScript. | *"Ejecuta un diagnóstico pasivo pre-vuelo antes de publicar para verificar tokens y cookies."* | Reporte estructurado con estado de `li_at`, `JSESSIONID`, `can_proceed: true/false`, evitando bucles de redirección 302 y revocaciones de sesión. |
+| **34** | `linkedin_voyager_get_profile` | Extraer perfiles directamente desde la API privada Voyager Rest.li 2.0 (`/voyager/api/identity/`). | *"Tráeme el perfil de Jesús Moronta vía Voyager API sin usar selectores DOM."* | JSON estructurado puro con experiencias, educación, aptitudes y titular, 100% inmune a cambios de clases CSS. Prioriza WebSocket CDP de Brave. |
+| **35** | `linkedin_voyager_get_feed` | Extraer publicaciones del feed directamente desde `/voyager/api/feed/dash/updates`. | *"Consulta los 10 posts más recientes del feed global mediante Voyager."* | Lista de posts normalizados con texto, autor, URNs y contadores de likes/comentarios sin interactuar con el scroll visual de la página. |
+| **36** | `linkedin_analyze_dwell_time` | Analizar un post contra las señales de telemetría algorítmica y Dwell Time de LinkedIn. | *"Analiza el Dwell Time proyectado y la visibilidad antes del pliegue de este borrador."* | Tiempo de lectura en segundos, categoría algorítmica (MICRO_DWELL, QUALIFIED_IMPRESSION, HIGH_ENGAGEMENT), puntuación DTPI (0-100), probabilidad de expansión 'Ver más' y recomendaciones. |
+| **37** | `linkedin_rea_inspect_apk` | Realizar ingeniería inversa sobre el APK oficial de LinkedIn Android (`com.linkedin.android`). | *"Inspecciona la arquitectura de cliente móvil nativo o analiza este APK descargado."* | Mapeo de rutas Rest.li 2.0 móviles, cabeceras de firma `X-Li-User-Agent`, o recuento empírico de dex, librerías `.so` y manifiesto binario AXML sin datos inventados. |
 
 ---
 

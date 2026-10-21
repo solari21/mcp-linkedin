@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mcp-linkedin"
-version = "1.1.0"
+version = "1.2.0"
 description = "Professional Model Context Protocol (MCP) server for LinkedIn automation and AI agents with FastMCP, Playwright, and Human-in-the-Loop safeguards."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -39,7 +39,8 @@ dependencies = [
     "playwright>=1.40.0",
     "beautifulsoup4>=4.12.0",
     "python-dotenv>=1.0.0",
-    "websocket-client>=1.8.0"
+    "websocket-client>=1.8.0",
+    "websockets>=12.0"
 ]
 
 [project.urls]
@@ -52,7 +53,7 @@ mcp-linkedin = "linkedin_server:main"
 linkedin-mcp = "linkedin_server:main"
 
 [tool.setuptools]
-py-modules = ["linkedin_server", "linkedin_extended", "linkedin_interactive_login", "linkedin_intelligence", "linkedin_cdp"]
+py-modules = ["linkedin_server", "linkedin_extended", "linkedin_interactive_login", "linkedin_intelligence", "linkedin_cdp", "linkedin_voyager", "linkedin_preflight", "linkedin_mobile_api", "linkedin_dwell"]
 
 [tool.setuptools.package-data]
 "*" = ["data/*.json", "assets/*"]

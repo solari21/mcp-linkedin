@@ -429,7 +429,24 @@ def score_hook(text: str, formula_id: Optional[int] = None) -> dict:
             "best_for": f["best_for"]
         })
 
-    return {
+    # Análisis de Telemetría Algorítmica y Dwell Time (Sinergia D REA)
+    dwell_data = None
+    try:
+        from linkedin_dwell import LinkedInDwellAnalyzer
+        dwell_metrics = LinkedInDwellAnalyzer.analyze_post(text)
+        dwell_data = {
+            "estimated_dwell_seconds": dwell_metrics.estimated_dwell_seconds,
+            "dwell_tier": dwell_metrics.dwell_tier,
+            "dtpi_score": dwell_metrics.dtpi_score,
+            "expand_propensity_score": dwell_metrics.expand_propensity_score,
+            "algorithmic_boost_projected": dwell_metrics.algorithmic_boost_projected,
+            "mobile_cliffhanger_score": dwell_metrics.fold_analysis.get("mobile_cliffhanger_score"),
+            "actionable_recommendations": dwell_metrics.actionable_recommendations
+        }
+    except Exception as d_err:
+        dwell_data = {"error": f"Fallo al computar telemetría de Dwell Time: {d_err}"}
+
+    res = {
         "hook_line_1": line1,
         "hook_line_1_length": len_l1,
         "mobile_visible_140": mobile_ok,
@@ -439,6 +456,9 @@ def score_hook(text: str, formula_id: Optional[int] = None) -> dict:
         "specified_formula": matched_formula,
         "recommended_formulas": suggested[:4]
     }
+    if dwell_data:
+        res["dwell_time_telemetry"] = dwell_data
+    return res
 
 
 def score_profile_rubric(profile_data: dict) -> dict:

@@ -1,3 +1,4 @@
+import re
 import os
 
 import sys
@@ -34,6 +35,11 @@ from linkedin_interactive_login import (
 )
 import linkedin_extended as le
 import linkedin_intelligence as li
+from linkedin_preflight import PassiveSessionAuditor, PreflightReport
+from linkedin_voyager import VoyagerClient, VoyagerRestLiParser
+from linkedin_mobile_api import LinkedInMobileEngine
+from linkedin_dwell import LinkedInDwellAnalyzer
+from linkedin_cdp import is_brave_cdp_available, BraveLinkedInCDP
 
 mcp = FastMCP("linkedin")
 
@@ -1334,41 +1340,42 @@ async def linkedin_search_companies(keywords: str, limit: int = 10) -> list:
             await browser.close()
 
 @mcp.tool()
-
-async def linkedin_check_session() -> dict:
-
-    """Valida la salud de la sesión activa en LinkedIn."""
+async def linkedin_check_session(quick_passive: bool = True) -> dict:
+    """
+    Valida la salud de la sesión activa en LinkedIn.
+    Por defecto (quick_passive=True), utiliza la auditoría pasiva pre-vuelo de REA (Sinergia B)
+    por CDP/almacenamiento en 0.05s sin evaluar JavaScript, sin abrir ventanas y sin provocar
+    bucles de redirección HTTP 302 / Clear-Site-Data.
+    """
+    if quick_passive:
+        report = PassiveSessionAuditor.audit_session()
+        return {
+            "status": report.status.lower(),
+            "can_proceed": report.can_proceed,
+            "cdp_available": report.cdp_available,
+            "verdict_message": report.verdict_message,
+            "recommended_action": report.recommended_action,
+            "tab_url": report.tab_url,
+            "engine": "Brave Browser" if os.path.exists(BRAVE_PATH) else "Chromium",
+            "storage_state_active": STORAGE_STATE_FILE.exists(),
+            "cookies_audited": report.cookies_audited
+        }
 
     creds = get_creds()
-
     async with async_playwright() as p:
-
         browser, context = await get_browser_and_context(p)
-
         page = await context.new_page()
-
         try:
-
             await ensure_authenticated(page, creds)
-
             user_title = await page.title()
-
             return {
-
                 "status": "active",
-
                 "url": page.url,
-
                 "title": user_title,
-
                 "engine": "Brave Browser" if os.path.exists(BRAVE_PATH) else "Chromium",
-
                 "storage_state_active": STORAGE_STATE_FILE.exists()
-
             }
-
         finally:
-
             await browser.close()
 
 @mcp.tool()
@@ -1474,17 +1481,50 @@ async def linkedin_send_message(recipient_or_thread: str, message_text: str, con
 async def linkedin_get_profile_details(profile_url_or_username: str = "me") -> dict:
     """
     Extrae la información profunda y exhaustiva de un perfil de LinkedIn en JSON estructurado.
-    Incluye: Nombre, Titular, Ubicación, Acerca de (About), Experiencias laborales con fechas/duraciones,
-    Educación, Habilidades (Skills), Destacados y Actividad reciente.
-    Inspirado en eliasbiondo/linkedin-mcp-server con BeautifulSoup resiliente.
+    Arquitectura Híbrida REA:
+    1. Si Brave CDP está activo, consulta pasivamente la API privada Voyager Rest.li sin abrir subprocesos Playwright (Regla II.32).
+    2. Fallback transparente al contexto Playwright y parser de DOM BeautifulSoup si no hay CDP activo o la API está restringida.
     """
+    target = profile_url_or_username.strip()
+    if "/in/" in target:
+        clean_target = target.split("/in/")[1].split("/")[0].split("?")[0]
+    else:
+        clean_target = target
+
+    # Intento 1: Conexión pasiva por WebSocket CDP si Brave está abierto (Zero subprocesos concurrentes)
+    if is_brave_cdp_available():
+        try:
+            cdp = await BraveLinkedInCDP.connect_active()
+            if cdp:
+                voyager = VoyagerClient(cdp_client=cdp)
+                voyager_res = await (voyager.get_my_profile() if clean_target == "me" else voyager.get_profile(clean_target))
+                if voyager_res and (voyager_res.first_name or voyager_res.headline or voyager_res.experiences):
+                    res_dict = voyager_res.to_dict()
+                    res_dict["extraction_source"] = "voyager_api_cdp_passive"
+                    return res_dict
+        except Exception as cdp_err:
+            print(f"[MCP Linkedin] Error consultando perfil por CDP pasivo: {cdp_err}")
+
+    # Intento 2: Fallback a Playwright headless
     creds = get_creds()
     async with async_playwright() as p:
         browser, context = await get_browser_and_context(p)
         page = await context.new_page()
         try:
             await ensure_authenticated(page, creds)
-            return await le.extract_profile_details(page, profile_url_or_username=profile_url_or_username)
+            voyager = VoyagerClient(page=page)
+            try:
+                voyager_res = await (voyager.get_my_profile() if clean_target == "me" else voyager.get_profile(clean_target))
+                if voyager_res and (voyager_res.first_name or voyager_res.headline or voyager_res.experiences):
+                    res_dict = voyager_res.to_dict()
+                    res_dict["extraction_source"] = "voyager_api_restli"
+                    return res_dict
+            except Exception as v_err:
+                print(f"[MCP Linkedin] Voyager API profile lookup error, falling back to DOM: {v_err}")
+
+            dom_res = await le.extract_profile_details(page, profile_url_or_username=profile_url_or_username)
+            dom_res["extraction_source"] = "dom_beautifulsoup_fallback"
+            return dom_res
         finally:
             await browser.close()
 
@@ -1492,16 +1532,48 @@ async def linkedin_get_profile_details(profile_url_or_username: str = "me") -> d
 async def linkedin_get_feed_posts(limit: int = 10) -> dict:
     """
     Extrae publicaciones activas del feed global de LinkedIn (/feed/).
-    Devuelve autor, titular del autor, texto de la publicación y conteo de reacciones.
-    Inspirado en eliasbiondo/linkedin-mcp-server con protección de scroll humano.
+    Arquitectura Híbrida REA:
+    1. Si Brave CDP está activo, consulta pasivamente la API privada Voyager Rest.li sin abrir subprocesos Playwright (Regla II.32).
+    2. Fallback transparente al scroll del DOM en Playwright si la API interna estuviera limitada.
     """
+    # Intento 1: Conexión pasiva por WebSocket CDP si Brave está abierto (Zero subprocesos concurrentes)
+    if is_brave_cdp_available():
+        try:
+            cdp = await BraveLinkedInCDP.connect_active()
+            if cdp:
+                voyager = VoyagerClient(cdp_client=cdp)
+                v_posts = await voyager.get_feed_updates(count=limit)
+                if v_posts:
+                    return {
+                        "total_extracted": len(v_posts),
+                        "posts": [p.to_dict() for p in v_posts],
+                        "extraction_source": "voyager_api_cdp_passive"
+                    }
+        except Exception as cdp_err:
+            print(f"[MCP Linkedin] Error consultando feed por CDP pasivo: {cdp_err}")
+
+    # Intento 2: Fallback a Playwright headless
     creds = get_creds()
     async with async_playwright() as p:
         browser, context = await get_browser_and_context(p)
         page = await context.new_page()
         try:
             await ensure_authenticated(page, creds)
-            return await le.extract_feed_posts(page, limit=limit)
+            voyager = VoyagerClient(page=page)
+            try:
+                v_posts = await voyager.get_feed_updates(count=limit)
+                if v_posts:
+                    return {
+                        "total_extracted": len(v_posts),
+                        "posts": [p.to_dict() for p in v_posts],
+                        "extraction_source": "voyager_api_restli"
+                    }
+            except Exception as v_err:
+                print(f"[MCP Linkedin] Voyager API feed lookup error, falling back to DOM: {v_err}")
+
+            dom_res = await le.extract_feed_posts(page, limit=limit)
+            dom_res["extraction_source"] = "dom_beautifulsoup_fallback"
+            return dom_res
         finally:
             await browser.close()
 
@@ -1509,7 +1581,9 @@ async def linkedin_get_feed_posts(limit: int = 10) -> dict:
 async def linkedin_get_job_details(job_url_or_id: str) -> dict:
     """
     Extrae la descripción completa y requisitos de una oferta de empleo a partir de su ID o URL.
-    Incluye: Título, Empresa, Ubicación, Modalidad (remoto/híbrido/presencial) y cuerpo completo de la descripción.
+    Arquitectura Híbrida REA:
+    1. Intenta primero la API privada Voyager Rest.li.
+    2. Fallback transparente al DOM si la API no devuelve contenido.
     """
     creds = get_creds()
     async with async_playwright() as p:
@@ -1517,7 +1591,24 @@ async def linkedin_get_job_details(job_url_or_id: str) -> dict:
         page = await context.new_page()
         try:
             await ensure_authenticated(page, creds)
-            return await le.extract_job_details(page, job_url_or_id=job_url_or_id)
+
+            # Intento 1: Voyager API Job (Sinergia A)
+            m = re.search(r"\d+", job_url_or_id)
+            if m:
+                clean_id = m.group(0)
+                voyager = VoyagerClient(page=page)
+                try:
+                    v_job = await voyager.get_job_details(clean_id)
+                    if v_job and v_job.title:
+                        res = v_job.to_dict()
+                        res["extraction_source"] = "voyager_api_restli"
+                        return res
+                except Exception as v_err:
+                    print(f"[MCP Linkedin] Voyager job lookup error, falling back to DOM: {v_err}")
+
+            dom_res = await le.extract_job_details(page, job_url_or_id=job_url_or_id)
+            dom_res["extraction_source"] = "dom_beautifulsoup_fallback"
+            return dom_res
         finally:
             await browser.close()
 
@@ -1525,7 +1616,9 @@ async def linkedin_get_job_details(job_url_or_id: str) -> dict:
 async def linkedin_get_company_details(company_url_or_slug: str) -> dict:
     """
     Extrae los detalles corporativos e institucionales completos de una empresa u organización.
-    Incluye: Nombre, Resumen institucional, Sitio web, Sector/Industria, Tamaño y Sede.
+    Arquitectura Híbrida REA:
+    1. Intenta primero la API privada Voyager Rest.li.
+    2. Fallback transparente al DOM si la API no devuelve contenido.
     """
     creds = get_creds()
     async with async_playwright() as p:
@@ -1533,7 +1626,25 @@ async def linkedin_get_company_details(company_url_or_slug: str) -> dict:
         page = await context.new_page()
         try:
             await ensure_authenticated(page, creds)
-            return await le.extract_company_details(page, company_url_or_slug=company_url_or_slug)
+
+            # Extraer slug limpio
+            slug = company_url_or_slug.strip().rstrip("/")
+            if "/company/" in slug:
+                slug = slug.split("/company/")[1].split("/")[0].split("?")[0]
+
+            voyager = VoyagerClient(page=page)
+            try:
+                v_comp = await voyager.get_company_details(slug)
+                if v_comp and v_comp.name:
+                    res = v_comp.to_dict()
+                    res["extraction_source"] = "voyager_api_restli"
+                    return res
+            except Exception as v_err:
+                print(f"[MCP Linkedin] Voyager company lookup error, falling back to DOM: {v_err}")
+
+            dom_res = await le.extract_company_details(page, company_url_or_slug=company_url_or_slug)
+            dom_res["extraction_source"] = "dom_beautifulsoup_fallback"
+            return dom_res
         finally:
             await browser.close()
 
@@ -1655,6 +1766,158 @@ async def linkedin_dm_sequence(name: str, hook_reason: str, offer_goal: str = ""
     4. Seguimiento 2 (+10 días, cierre de ciclo sin presión).
     """
     return li.generate_dm_sequence(name=name, hook_reason=hook_reason, offer_goal=offer_goal)
+
+# ==============================================================================
+# SECCIÓN G: HERRAMIENTAS DE INTEGRACIÓN REA MCP (INGENIERÍA INVERSA & TELEMETRÍA)
+# ==============================================================================
+
+@mcp.tool()
+async def linkedin_passive_preflight(cdp_port: int = 9222) -> dict:
+    """
+    Realiza una auditoría pasiva pre-vuelo de la sesión de LinkedIn (Sinergia B REA).
+    Inspecciona tokens críticos (li_at, JSESSIONID, bcookie, li_rm) por CDP en 0.05s
+    sin evaluar JavaScript, sin simular clics y sin navegar a URLs que puedan causar
+    bucles de redirección HTTP 302 / Clear-Site-Data o retos de seguridad.
+    """
+    report = PassiveSessionAuditor.audit_session(cdp_port=cdp_port)
+    return report.to_dict()
+
+@mcp.tool()
+async def linkedin_voyager_get_profile(identifier: str = "me") -> dict:
+    """
+    Extrae la información profunda de un perfil de LinkedIn directamente desde la
+    API privada Voyager (/voyager/api/identity/) en JSON estructurado Rest.li (Sinergia A REA).
+    Completamente inmune a cambios visuales o de clases CSS del DOM.
+    Prioriza SIEMPRE la conexión pasiva CDP a Brave (puerto 9222) sin lanzar subprocesos concurrentes (Regla II.32).
+    """
+    target = identifier.strip()
+    if "/in/" in target:
+        clean_target = target.split("/in/")[1].split("/")[0].split("?")[0]
+    else:
+        clean_target = target
+
+    # Intento 1: Conexión pasiva por WebSocket CDP si Brave está abierto (Zero subprocesos)
+    if is_brave_cdp_available():
+        try:
+            cdp = await BraveLinkedInCDP.connect_active()
+            if cdp:
+                voyager = VoyagerClient(cdp_client=cdp)
+                profile = await (voyager.get_my_profile() if clean_target == "me" else voyager.get_profile(clean_target))
+                if profile and (profile.first_name or profile.headline or profile.experiences):
+                    res = profile.to_dict()
+                    res["status"] = "success"
+                    res["source"] = "brave_cdp_passive_websocket"
+                    return res
+        except Exception as cdp_err:
+            print(f"[MCP Linkedin] Error consultando Voyager por CDP pasivo: {cdp_err}")
+
+    # Intento 2: Fallback a Playwright headless solo si no hay sesión abierta en Brave
+    creds = get_creds()
+    async with async_playwright() as p:
+        browser, context = await get_browser_and_context(p)
+        page = await context.new_page()
+        try:
+            await ensure_authenticated(page, creds)
+            voyager = VoyagerClient(page=page)
+            profile = await (voyager.get_my_profile() if clean_target == "me" else voyager.get_profile(clean_target))
+            if profile and (profile.first_name or profile.headline or profile.experiences):
+                res = profile.to_dict()
+                res["status"] = "success"
+                res["source"] = "playwright_headless_context"
+                return res
+            return {"status": "not_found", "message": f"No se pudo extraer el perfil para '{identifier}' vía Voyager."}
+        finally:
+            await browser.close()
+
+@mcp.tool()
+async def linkedin_voyager_get_feed(limit: int = 10) -> dict:
+    """
+    Extrae publicaciones activas del feed global directamente desde los endpoints
+    de la API privada Voyager (/voyager/api/feed/dash/updates) (Sinergia A REA).
+    Devuelve JSON estructurado puro con texto, autor, URNs y métricas de interacción.
+    Prioriza SIEMPRE la conexión pasiva CDP a Brave (puerto 9222) sin lanzar subprocesos concurrentes (Regla II.32).
+    """
+    # Intento 1: Conexión pasiva por WebSocket CDP si Brave está abierto (Zero subprocesos)
+    if is_brave_cdp_available():
+        try:
+            cdp = await BraveLinkedInCDP.connect_active()
+            if cdp:
+                voyager = VoyagerClient(cdp_client=cdp)
+                posts = await voyager.get_feed_updates(count=limit)
+                if posts:
+                    return {
+                        "status": "success",
+                        "total_extracted": len(posts),
+                        "posts": [p.to_dict() for p in posts],
+                        "source": "brave_cdp_passive_websocket"
+                    }
+        except Exception as cdp_err:
+            print(f"[MCP Linkedin] Error consultando feed Voyager por CDP pasivo: {cdp_err}")
+
+    # Intento 2: Fallback a Playwright headless
+    creds = get_creds()
+    async with async_playwright() as p:
+        browser, context = await get_browser_and_context(p)
+        page = await context.new_page()
+        try:
+            await ensure_authenticated(page, creds)
+            voyager = VoyagerClient(page=page)
+            posts = await voyager.get_feed_updates(count=limit)
+            return {
+                "status": "success",
+                "total_extracted": len(posts),
+                "posts": [p.to_dict() for p in posts],
+                "source": "playwright_headless_context"
+            }
+        finally:
+            await browser.close()
+
+@mcp.tool()
+async def linkedin_analyze_dwell_time(text: str) -> dict:
+    """
+    Analiza un texto contra las señales y umbrales empíricos de telemetría de LinkedIn (Sinergia D REA).
+    Calcula:
+    1. Tiempo estimado de lectura (segundos).
+    2. Categoría algorítmica (MICRO_DWELL <1s, QUALIFIED_IMPRESSION >=1.5s, HIGH_ENGAGEMENT >=4.0s).
+    3. DTPI (Dwell Time Probability Index, 0 a 100).
+    4. Probabilidad de clic en 'Ver más' (FeedExpandContent) según visibilidad del pliegue (140 car móvil, 210 car escritorio).
+    5. Multiplicador de impulso algorítmico proyectado y recomendaciones accionables.
+    """
+    metrics = LinkedInDwellAnalyzer.analyze_post(text)
+    return metrics.to_dict()
+
+@mcp.tool()
+async def linkedin_rea_inspect_apk(apk_path: str = "") -> dict:
+    """
+    Realiza ingeniería inversa sobre el APK oficial de LinkedIn (com.linkedin.android) (Sinergia C REA).
+    Mapea la arquitectura de cliente móvil nativo, rutas Rest.li 2.0 de alta velocidad y cabeceras de firma.
+    Si se suministra una ruta local a un archivo APK, analiza empíricamente sus componentes y manifiesto decodificado.
+    """
+    if apk_path and apk_path.strip():
+        res = await LinkedInMobileEngine.inspect_apk_with_rea(apk_path.strip())
+        return res.to_dict()
+
+    return {
+        "mode": "specification_catalog",
+        "status": "mobile_specification_active",
+        "package_name": "com.linkedin.android",
+        "mobile_client_version": "4.1.999",
+        "restli_protocol_version": "2.0.0",
+        "mobile_user_agent": LinkedInMobileEngine.get_mobile_headers()["User-Agent"],
+        "sample_mobile_headers": LinkedInMobileEngine.get_mobile_headers(csrf_token="ajax:example_csrf"),
+        "mobile_endpoints": {
+            "profile_light": LinkedInMobileEngine.get_endpoint_url("profile_light", id="me"),
+            "profile_full": LinkedInMobileEngine.get_endpoint_url("profile_full", id="me"),
+            "feed_mobile": LinkedInMobileEngine.get_endpoint_url("feed_mobile", count=10),
+            "search_people": LinkedInMobileEngine.get_endpoint_url("search_people", keywords="AI"),
+            "search_jobs": LinkedInMobileEngine.get_endpoint_url("search_jobs_mobile", keywords="Software")
+        },
+        "rea_capabilities": [
+            "inspect_android_package: análisis de manifiesto binario y permisos AXML reales",
+            "search_android_classes: búsqueda de interceptores Rest.li y OkHttp",
+            "decode_android_resources: extracción de configuraciones de red XML"
+        ]
+    }
 
 def main():
     """Punto de entrada de consola para iniciar el servidor MCP."""

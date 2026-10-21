@@ -22,7 +22,7 @@
 Unlike opaque automation scripts, **MCP LinkedIn** adheres to a strict **Human-in-the-Loop (HITL)** philosophy featuring mandatory two-phase safeguards (`confirm=True`) for destructive or sensitive operations, human cadence emulation, and an interactive Plan B that resolves security challenges without focus-stealing or intrusive windows.
 
 > [!TIP]
-> **Complete Operational Manual**: For in-depth command usage, recommended prompts, architecture breakdowns, and weekly workflows across all 32 tools, explore the **[Operational Usage Guide (GUIA_USO.md)](./GUIA_USO.md)**.
+> **Complete Operational Manual**: For in-depth command usage, recommended prompts, architecture breakdowns, and weekly workflows across all 37 tools, explore the **[Operational Usage Guide (GUIA_USO.md)](./GUIA_USO.md)**.
 
 ---
 
@@ -32,7 +32,7 @@ Several experimental LinkedIn MCP implementations exist across the open-source e
 
 | Feature / Capability | `stickerdaniel/linkedin-mcp` | `eliasbiondo/linkedin-mcp` | 🚀 **MCP LinkedIn (This Project)** |
 |---|:---:|:---:|:---:|
-| **Available Tools** | 4 | 5 | **32 full-featured tools** |
+| **Available Tools** | 4 | 5 | **37 full-featured tools** |
 | **Rich Media Publishing (Images)** | ❌ Text only | ❌ Unavailable | ✅ **Native HD upload (`expect_file_chooser`)** |
 | **Automatic First Comment** | ❌ No | ❌ No | ✅ **Automated injection for organic reach** |
 | **Full 3-Dots Menu Control** | ❌ No | ❌ No | ✅ **Feature, Save, Embed `<iframe>`, Edit, Delete** |
@@ -44,6 +44,10 @@ Several experimental LinkedIn MCP implementations exist across the open-source e
 | **Human Cadence Emulation** | ❌ Instantaneous | ❌ Instantaneous | ✅ **Gaussian randomized jitter (1.5s - 3.0s)** |
 | **Local Anti-AI Engine & Heuristics** | ❌ No | ❌ No | ✅ **3-Pass Humanizer & 5-Check AI Detection Panel** |
 | **Calibrated Copywriting Strategy** | ❌ No | ❌ No | ✅ **21 Hook formulas, 9 comment archetypes, 4:5 carousels** |
+| **Hybrid Voyager API Architecture** | ❌ Fragile DOM | ❌ Fragile DOM | ✅ **Voyager Rest.li 2.0 native parsing immune to CSS class changes (REA Synergy A)** |
+| **Passive Pre-Flight Diagnostics** | ❌ 302 loop / Ban | ❌ 302 loop / Ban | ✅ **Passive CDP audit in 0.05s with 0 JS evaluation & 0 redirect loops (REA Synergy B)** |
+| **Dwell Time Algorithmic Telemetry** | ❌ Blind | ❌ Blind | ✅ **Empirical thresholds (<1.0s, >=1.5s, >=4.0s), DTPI & 'See More' propensity (REA Synergy D)** |
+| **Android Mobile Reverse Engineering** | ❌ Unavailable | ❌ Unavailable | ✅ **High-speed Rest.li routes & empirical AXML binary parsing for com.linkedin.android (REA Synergy C)** |
 
 ---
 
@@ -59,7 +63,7 @@ Unlike the sequential lifecycle of publishing, the architecture of **MCP LinkedI
 
 ## 🔄 End-to-End Operational Flow (Lifecycle Lifecycle)
 
-The following flowchart outlines the complete operational sequence and lifecycle of a post, coordinating all **32 tools** from initial ideation through post-publication monitoring:
+The following flowchart outlines the complete operational sequence and lifecycle of a post, coordinating all **37 tools** from initial ideation through post-publication monitoring:
 
 <p align="center">
   <img src="assets/diagrama_flujo_mcp_linkedin.png?v=1.1.0" alt="MCP LinkedIn End-to-End Operational Flowchart" width="850">
@@ -67,7 +71,7 @@ The following flowchart outlines the complete operational sequence and lifecycle
 
 ---
 
-## 🛠️ Complete Tools Catalog (32 Tools)
+## 🛠️ Complete Tools Catalog (37 Tools)
 
 ### A. Publishing and Content Distribution
 * `linkedin_create_post`: Publishes professional posts with formatting, hashtags, optional high-definition image upload, automatic first-comment injection with external links, and optional `clean_previous_tests=True` parameter for pre-flight deduplication and purging of orphaned test posts.
@@ -113,6 +117,13 @@ The following flowchart outlines the complete operational sequence and lifecycle
 * `linkedin_repurpose_content`: Deconstructs long-form content (videos, transcripts, articles) into claims, numbers, stories, and mechanisms to build a weekly 4-post calendar.
 * `linkedin_dm_sequence`: 4-stage prospecting sequence with invite notes strictly $\le 200$ characters and 2 spaced follow-ups.
 
+### G. REA MCP Integration: Reverse Engineering, Voyager API & Algorithmic Telemetry (Synergies A, B, C & D)
+* `linkedin_passive_preflight`: Performs a passive pre-flight audit of the LinkedIn session (REA Synergy B). Inspects critical tokens (`li_at`, `JSESSIONID`, `bcookie`, `li_rm`) via WebSocket CDP in 0.05s without evaluating JavaScript, simulating clicks, or triggering HTTP 302 loops / `Clear-Site-Data` security challenges.
+* `linkedin_voyager_get_profile`: Extracts comprehensive structured profile data directly from the private Voyager API (`/voyager/api/identity/`) in Rest.li 2.0 format (REA Synergy A). Connects directly via WebSocket CDP with zero concurrent browser collision, 100% immune to DOM CSS redesigns.
+* `linkedin_voyager_get_feed`: Retrieves active global feed updates directly from `/voyager/api/feed/dash/updates` as pure structured JSON with text, author, URNs, and social counts, decoupled from page DOM scrolling.
+* `linkedin_analyze_dwell_time`: Evaluates text against LinkedIn's empirical telemetry signals (REA Synergy D). Computes estimated human reading time (seconds), algorithmic tier (MICRO_DWELL <1.0s, QUALIFIED_IMPRESSION >=1.5s, HIGH_ENGAGEMENT >=4.0s), DTPI score (0 to 100), 'See More' expand click propensity (FeedExpandContent) across fold cutoffs (140 chars mobile, 210 chars desktop), and actionable recommendations.
+* `linkedin_rea_inspect_apk`: Reverse engineers the official LinkedIn Android APK (`com.linkedin.android`) (REA Synergy C). Maps native mobile client architecture, high-speed Rest.li 2.0 endpoints, and signature headers. Empirically inspects APK packages by parsing the binary AXML manifest, native `.so` libraries, `.dex` classes count, and declared components with zero dummy data.
+
 ---
 
 ## 📦 Installation & Setup
@@ -145,7 +156,7 @@ chmod +x install.sh
 pip install -e .
 
 # Or direct install of pre-built release wheel:
-pip install dist/mcp_linkedin-1.0.0-py3-none-any.whl
+pip install dist/mcp_linkedin-1.2.0-py3-none-any.whl
 
 # Install Playwright browser drivers:
 playwright install chromium
@@ -293,6 +304,14 @@ Current status and upcoming milestones (also tracked on the interactive Kanban b
 - [x] **Direct Messaging Prospecting**: `linkedin_dm_sequence` (4-stage outreach sequence with invite notes $\le 200$ chars and spaced follow-ups).
 - [x] **Official Distribution & CI/CD Auto-Release**: Official releases on [GitHub Releases](https://github.com/solari21/mcp-linkedin/releases) with pre-compiled Wheel (`.whl`) and tarball (`.tar.gz`) binaries, automated CI on push to `main`, and cross-sync with [Projects V2 #2 (Roadmap)](https://github.com/users/solari21/projects/2).
 
+### ✅ Implemented (v1.2.0 - REA MCP Integration, Voyager API & Algorithmic Telemetry)
+- [x] **Hybrid Voyager Rest.li API Architecture (Synergy A)**: Direct mapping and consumption of private `/voyager/api/` endpoints (profiles, feeds, jobs, companies) in normalized JSON, immune to SPA DOM layout changes.
+- [x] **Passive Pre-Flight CDP Diagnostics (Synergy B)**: 0.05s atomic token inspection (`li_at`, `JSESSIONID`) and session freshness check without JavaScript evaluation, zero clicks, and zero risk of `HTTP 302` redirect loops.
+- [x] **Android com.linkedin.android Reverse Engineering (Synergy C)**: Mapping of high-speed Rest.li 2.0 mobile routes, mobile signature headers (`X-Li-User-Agent`), and empirical AXML binary parser for APK inspection without dummy stubs.
+- [x] **Algorithmic Dwell Time Calibration & Telemetry (Synergy D)**: Discovery of empirical retention thresholds (<1.0s micro-dwell, >=1.5s qualified impression, >=4.0s high-engagement 2.2x boost), DTPI index (0-100), fold cutoff optimization (140/210 chars for 'See More'), and direct integration into `linkedin_hook_score`.
+- [x] **Silent WebSocket CDP Priority (Rule II.32)**: Voyager tools query the API through the direct WebSocket connection to the active Brave tab (`/devtools/page/<id>`), eliminating concurrent Chromium collisions and preventing `li_at` revocation.
+- [x] **Expanded 37 Tools Catalog**: Inclusion of 5 new tools in Section G and official packaging in `dist/` (`mcp_linkedin-1.2.0-py3-none-any.whl`).
+
 ### 🛡️ Production Engineering Lessons & DOM Selectors in 2026
 1. **Phantom Inputs on `/login`**: LinkedIn injects hidden fields in the DOM for autofill and WebAuthn with 0 dimensions (`visible: false`). Forcing the `:visible` pseudo-selector (`input[type="email"]:visible`, `input[type="password"]:visible`) prevents Playwright `TimeoutError`.
 2. **SSO vs. Form Button Collisions**: The "Sign in with Microsoft" button contains the string "Sign in". Submissions must be dispatched via `Enter` on the password input (`press("Enter")`) or strict role matching (`name="Sign in", exact=True`).
@@ -321,7 +340,7 @@ Current status and upcoming milestones (also tracked on the interactive Kanban b
 
 This project builds upon and honors the contributions of the open-source community:
 
-* **[Jesús Moronta](https://github.com/solari21)**: Overall FastMCP architecture, engineering integration, passive Brave CDP automation with zero focus theft, Tiptap multiline injection, 32-tool suite, and ongoing development.
+* **[Jesús Moronta](https://github.com/solari21)**: Overall FastMCP architecture, engineering integration, passive Brave CDP automation with zero focus theft, Tiptap multiline injection, 37-tool suite, and ongoing development.
 * **[Jake Schincariol](https://github.com/Jakeschincariol)** ([opusjake.ai](https://opusjake.ai)): Creator of the **[linkedin-agent-skill](https://github.com/Jakeschincariol/linkedin-agent-skill)** repository and benchmark, from which the anti-AI heuristic engines (`humanize` and `detect`), 21 hook formulas (`hooks.json`), 100-point profile rubric (`rubric.json`), vertical 4:5 PDF carousel guidelines, and inbox/reply triage rules were adapted and integrated.
 * **[@Daniel Sticker (stickerdaniel)](https://github.com/stickerdaniel/linkedin-mcp-server)**: For early messaging concepts and initial MCP LinkedIn exploration.
 * **[@Elias Biondo (eliasbiondo)](https://github.com/eliasbiondo/linkedin-mcp-server)**: For foundational ideas on modular profile data extraction.

@@ -23,7 +23,7 @@
 A diferencia de otros scripts de automatización opacos, **MCP LinkedIn** incorpora una filosofía estricta de **Human-in-the-Loop (HITL)** con salvaguardas obligatorias en dos fases (`confirm=True`) para acciones críticas, emulación de cadencia humana y un Plan B interactivo que permite resolver retos de seguridad sin pérdida de foco.
 
 > [!TIP]
-> **Manual Operativo Completo**: Para consultar la guía detallada de comandos, prompts recomendados, arquitectura y flujos de trabajo semanales para las 32 herramientas, consulta la **[Guía Operativa de Uso (GUIA_USO.md)](./GUIA_USO.md)**.
+> **Manual Operativo Completo**: Para consultar la guía detallada de comandos, prompts recomendados, arquitectura y flujos de trabajo semanales para las 37 herramientas, consulta la **[Guía Operativa de Uso (GUIA_USO.md)](./GUIA_USO.md)**.
 
 ---
 
@@ -33,7 +33,7 @@ Actualmente existen implementaciones experimentales de MCP para LinkedIn en el e
 
 | Característica / Capacidad | `stickerdaniel/linkedin-mcp` | `eliasbiondo/linkedin-mcp` | 🚀 **MCP LinkedIn (Este Proyecto)** |
 |---|:---:|:---:|:---:|
-| **Herramientas Disponibles** | 4 | 5 | **32 herramientas completas** |
+| **Herramientas Disponibles** | 4 | 5 | **37 herramientas completas** |
 | **Publicación Enriquecida con Imágenes** | ❌ Solo texto | ❌ No disponible | ✅ **Subida nativa HD (`expect_file_chooser`)** |
 | **Primer Comentario Automático** | ❌ No | ❌ No | ✅ **Inyección automática para alcance orgánico** |
 | **Control Total del Menú de 3 Puntos** | ❌ No | ❌ No | ✅ **Destacar, Guardar, Embed `<iframe>`, Editar, Borrar** |
@@ -45,6 +45,10 @@ Actualmente existen implementaciones experimentales de MCP para LinkedIn en el e
 | **Emulación de Ritmo Humano** | ❌ Instantáneo | ❌ Instantáneo | ✅ **Jitter aleatorio gaussiano (1.5s - 3.0s)** |
 | **Inteligencia y Filtro Anti-IA Local** | ❌ No | ❌ No | ✅ **Humanizador en 3 pasadas y 5-Check Detection Panel** |
 | **Estrategia y Copywriting Calibrado** | ❌ No | ❌ No | ✅ **21 fórmulas de ganchos, 9 arquetipos de comentarios y carruseles 4:5** |
+| **Arquitectura Híbrida Voyager API** | ❌ DOM frágil | ❌ DOM frágil | ✅ **Voyager Rest.li 2.0 nativo inmune a cambios CSS del DOM (Sinergia A REA)** |
+| **Diagnóstico Pasivo Pre-Vuelo** | ❌ Bucle 302 / Ban | ❌ Bucle 302 / Ban | ✅ **Auditoría pasiva CDP en 0.05s sin evaluar JS ni bucles de redirección (Sinergia B REA)** |
+| **Telemetría Algorítmica Dwell Time** | ❌ Ciego | ❌ Ciego | ✅ **Umbrales empíricos (<1.0s, >=1.5s, >=4.0s), DTPI y probabilidad de expansión (Sinergia D REA)** |
+| **Ingeniería Inversa Android Móvil** | ❌ No disponible | ❌ No disponible | ✅ **Rutas móviles Rest.li y análisis AXML real com.linkedin.android (Sinergia C REA)** |
 
 ---
 
@@ -60,7 +64,7 @@ A diferencia de la secuencia temporal de publicación, la arquitectura de **MCP 
 
 ## 🔄 Diagrama de Flujo Operativo (Ciclo de Vida End-to-End)
 
-El siguiente diagrama de flujo ilustra la secuencia temporal y el ciclo de vida completo de una publicación, orquestando las **32 herramientas** desde la ideación inicial hasta la monitorización post-publicación:
+El siguiente diagrama de flujo ilustra la secuencia temporal y el ciclo de vida completo de una publicación, orquestando las **37 herramientas** desde la ideación inicial hasta la monitorización post-publicación:
 
 <p align="center">
   <img src="assets/diagrama_flujo_mcp_linkedin.png?v=1.1.0" alt="Diagrama de Flujo Operativo MCP LinkedIn" width="850">
@@ -68,7 +72,7 @@ El siguiente diagrama de flujo ilustra la secuencia temporal y el ciclo de vida 
 
 ---
 
-## 🛠️ Catálogo Completo de Herramientas (32 Herramientas)
+## 🛠️ Catálogo Completo de Herramientas (37 Herramientas)
 
 ### A. Publicación y Distribución de Contenido
 * `linkedin_create_post`: Crea publicaciones profesionales con formato, hashtags, imagen opcional en alta definición, publicación automática del primer comentario con enlaces y parámetro opcional `clean_previous_tests=True` para purga y deduplicación pre-flight de publicaciones previas de prueba.
@@ -114,6 +118,13 @@ El siguiente diagrama de flujo ilustra la secuencia temporal y el ciclo de vida 
 * `linkedin_repurpose_content`: Desglose de contenido largo (vídeos, transcripciones, artículos) en afirmaciones, números, historias y mecanismos con propuesta de calendario semanal de 4 publicaciones.
 * `linkedin_dm_sequence`: Generador de secuencias de prospección en 4 pasos con nota de invitación estrictamente $\le$ 200 caracteres y 2 follow-ups espaciados.
 
+### G. Integración REA MCP: Ingeniería Inversa, Voyager API y Telemetría Algorítmica (Sinergias A, B, C y D)
+* `linkedin_passive_preflight`: Realiza una auditoría pasiva pre-vuelo de la sesión de LinkedIn (Sinergia B REA). Inspecciona tokens críticos (`li_at`, `JSESSIONID`, `bcookie`, `li_rm`) por WebSocket CDP en 0.05s sin evaluar JavaScript, sin simular clics y sin navegar a URLs que puedan causar bucles de redirección HTTP 302 / `Clear-Site-Data` o retos de seguridad.
+* `linkedin_voyager_get_profile`: Extrae la información profunda de un perfil directamente desde la API privada Voyager (`/voyager/api/identity/`) en formato Rest.li 2.0 (Sinergia A REA). Conexión directa vía WebSocket CDP sin abrir navegadores concurrentes, 100% inmune a cambios de clases CSS del DOM.
+* `linkedin_voyager_get_feed`: Extrae publicaciones activas del feed global directamente desde `/voyager/api/feed/dash/updates` en JSON estructurado puro con texto, autor, URNs y métricas de interacción, desacoplado del scroll del DOM.
+* `linkedin_analyze_dwell_time`: Analiza un texto contra las señales empíricas de telemetría de LinkedIn (Sinergia D REA). Calcula el tiempo estimado de lectura (segundos), la categoría algorítmica (MICRO_DWELL <1.0s, QUALIFIED_IMPRESSION >=1.5s, HIGH_ENGAGEMENT >=4.0s), el índice DTPI (0 a 100), la probabilidad de clic en 'Ver más' (FeedExpandContent) según corte del pliegue (140 car móvil, 210 car escritorio) y recomendaciones accionables.
+* `linkedin_rea_inspect_apk`: Realiza ingeniería inversa sobre el APK oficial de LinkedIn (`com.linkedin.android`) (Sinergia C REA). Mapea la arquitectura de cliente móvil nativo, rutas Rest.li 2.0 de alta velocidad y cabeceras de firma. Analiza empíricamente paquetes APK extrayendo el manifiesto binario AXML, bibliotecas nativas, recuento de clases `.dex` y componentes reales sin datos ficticios.
+
 ---
 
 ## 📦 Instalación y Puesta en Marcha
@@ -146,7 +157,7 @@ chmod +x install.sh
 pip install -e .
 
 # O instalación directa del paquete precompilado:
-pip install dist/mcp_linkedin-1.0.0-py3-none-any.whl
+pip install dist/mcp_linkedin-1.2.0-py3-none-any.whl
 
 # Instalar los navegadores de Playwright:
 playwright install chromium
@@ -294,6 +305,14 @@ Estado actual del proyecto y próximas funcionalidades planificadas (disponible 
 - [x] **Prospección por Mensajería Directa**: `linkedin_dm_sequence` (secuencia en 4 fases con invitación $\le$ 200 caracteres y follow-ups espaciados).
 - [x] **Distribución Oficial y Auto-Release CI/CD**: Publicación oficial en [GitHub Releases](https://github.com/solari21/mcp-linkedin/releases) con binarios precompilados Wheel (`.whl`) y tarball (`.tar.gz`), workflow automatizado en cada push a `main` y sincronización transversal continua con el tablero [Projects V2 #2 (Roadmap)](https://github.com/users/solari21/projects/2).
 
+### ✅ Implementado (v1.2.0 - Integración REA MCP, Voyager API y Telemetría Algorítmica)
+- [x] **Arquitectura Híbrida Voyager API Rest.li (Sinergia A)**: Mapeo y consumo directo de endpoints privados `/voyager/api/` (perfiles, feeds, puestos y empresas) en JSON normalizado, inmune a rediseños o cambios en clases CSS de la SPA.
+- [x] **Auditoría Pasiva Pre-Vuelo CDP (Sinergia B)**: Diagnóstico atómico en 0.05s de `li_at`, `JSESSIONID` y vigencia de cookies sin evaluar JavaScript, sin clics y sin riesgo de bucles de redirección `HTTP 302` / `Clear-Site-Data`.
+- [x] **Ingeniería Inversa Android com.linkedin.android (Sinergia C)**: Mapeo de rutas nativas Rest.li 2.0 de alta velocidad, cabeceras de firma móvil (`X-Li-User-Agent`) y parser binario AXML para inspección empírica de APKs sin stubs ni datos inventados.
+- [x] **Calibración Algorítmica Dwell Time y Telemetría (Sinergia D)**: Descubrimiento de umbrales empíricos de retención (<1.0s micro-dwell, >=1.5s qualified impression, >=4.0s high-engagement 2.2x boost), DTPI (0-100), optimización de corte de pliegue ("Ver más" a 140/210 car) e integración directa en `linkedin_hook_score`.
+- [x] **Priorización Silenciosa WebSocket CDP (Regla II.32)**: Las herramientas Voyager consultan la API a través del WebSocket directo de la pestaña activa en Brave (`/devtools/page/<id>`), eliminando la colisión por lanzamiento de Chromium concurrente y previniendo la revocación de `li_at`.
+- [x] **Catálogo Expandido a 37 Herramientas**: Incorporación de 5 nuevas herramientas en la Sección G y empaquetado oficial en `dist/` (`mcp_linkedin-1.2.0-py3-none-any.whl`).
+
 ### 🛡️ Lecciones de Ingeniería y Selectores DOM en 2026
 1. **Inputs Fantasma en `/login`**: LinkedIn inyecta campos ocultos en el DOM para autocompletado y WebAuthn con dimensiones 0 (`visible: false`). Se requiere forzar el pseudoselector `:visible` (`input[type="email"]:visible`, `input[type="password"]:visible`) para evitar `TimeoutError` en Playwright.
 2. **Colisión de Botones SSO vs. Formulario**: El botón "Iniciar sesión con Microsoft" contiene el texto "Iniciar sesión". El envío debe realizarse mediante `Enter` en el input de contraseña (`press("Enter")`) o con coincidencia exacta de rol (`name="Iniciar sesión", exact=True`).
@@ -322,7 +341,7 @@ Estado actual del proyecto y próximas funcionalidades planificadas (disponible 
 
 Este proyecto se apoya y rinde tributo a las aportaciones técnicas y metodológicas de la comunidad open-source:
 
-* **[Jesús Moronta](https://github.com/solari21)**: Arquitectura global del ecosistema FastMCP, integración de ingeniería, automatización pasiva en Brave CDP sin robo de foco, inyección multilínea Tiptap, suite de 32 herramientas y desarrollo del proyecto.
+* **[Jesús Moronta](https://github.com/solari21)**: Arquitectura global del ecosistema FastMCP, integración de ingeniería, automatización pasiva en Brave CDP sin robo de foco, inyección multilínea Tiptap, suite de 37 herramientas y desarrollo del proyecto.
 * **[Jake Schincariol](https://github.com/Jakeschincariol)** ([opusjake.ai](https://opusjake.ai)): Creador del repositorio y benchmark **[linkedin-agent-skill](https://github.com/Jakeschincariol/linkedin-agent-skill)**, del cual se han adaptado e integrado los motores de heurística anti-detección de IA (`humanize` y `detect`), el catálogo de 21 fórmulas de ganchos (`hooks.json`), la rúbrica de 12 criterios y 100 puntos de perfil (`rubric.json`), las directrices de carruseles PDF verticales en ratio 4:5 y las reglas de triaje para bandeja de entrada y respuestas a publicaciones.
 * **[@Daniel Sticker (stickerdaniel)](https://github.com/stickerdaniel/linkedin-mcp-server)**: Por los conceptos preliminares de mensajería e integración inicial de MCP con LinkedIn.
 * **[@Elias Biondo (eliasbiondo)](https://github.com/eliasbiondo/linkedin-mcp-server)**: Por las ideas fundacionales sobre extracción modular de datos de perfiles.
